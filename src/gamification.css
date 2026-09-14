@@ -1,0 +1,209 @@
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: #07111f;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 232, 135, 0.055), transparent 24rem),
+    #07111f;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.24) transparent;
+}
+
+button,
+a,
+input,
+textarea {
+  outline: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  box-shadow: 0 0 0 2px rgba(0, 232, 135, 0.32);
+}
+
+.premium-card {
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(17,31,48,.96), rgba(13,27,42,.96));
+  box-shadow: 0 18px 50px rgba(0,0,0,.12);
+}
+
+.primary-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border-radius: .8rem;
+  padding: .72rem 1rem;
+  font-size: .78rem;
+  font-weight: 900;
+  transition: .2s ease;
+}
+
+.primary-btn {
+  background: #00e887;
+  color: #07111f;
+}
+
+.primary-btn:hover {
+  background: #00ff9c;
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.035);
+  color: #cbd5e1;
+}
+
+.secondary-btn:hover {
+  background: rgba(255,255,255,.07);
+  color: #fff;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: .4rem;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.field-input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .8rem;
+  background: rgba(255,255,255,.035);
+  padding: .75rem .85rem;
+  color: #fff;
+  font-size: .82rem;
+  transition: .2s ease;
+}
+
+.field-input::placeholder { color: #475569; }
+.field-input:focus { border-color: rgba(0,232,135,.35); background: rgba(255,255,255,.05); }
+
+.podium-glow {
+  border-radius: 22px;
+  box-shadow: 0 0 40px rgba(255,200,61,.18);
+}
+
+.wheel {
+  position: relative;
+  aspect-ratio: 1;
+  width: min(78vw, 430px);
+  border-radius: 50%;
+  border: 10px solid rgba(255,255,255,.11);
+  box-shadow: 0 0 0 5px rgba(255,255,255,.025), 0 28px 80px rgba(0,0,0,.4);
+}
+
+.wheel.premium {
+  background: conic-gradient(
+    #ffc83d 0deg 45deg,
+    #855cff 45deg 90deg,
+    #14293b 90deg 135deg,
+    #00e887 135deg 180deg,
+    #ffc83d 180deg 225deg,
+    #4776ff 225deg 270deg,
+    #192a39 270deg 315deg,
+    #ff5252 315deg 360deg
+  );
+}
+
+.wheel.classic {
+  background: conic-gradient(
+    #4776ff 0deg 60deg,
+    #14293b 60deg 120deg,
+    #00e887 120deg 180deg,
+    #203650 180deg 240deg,
+    #855cff 240deg 300deg,
+    #162a3d 300deg 360deg
+  );
+}
+
+.wheel::after {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.13);
+}
+
+.wheel-center {
+  position: absolute;
+  z-index: 4;
+  inset: 50% auto auto 50%;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  border: 8px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  background: #07111f;
+  color: #ffc83d;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+
+.wheel-pointer {
+  position: absolute;
+  z-index: 8;
+  top: -8px;
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 34px solid #fff;
+  filter: drop-shadow(0 5px 8px rgba(0,0,0,.35));
+}
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-layer i {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 16px;
+  border-radius: 2px;
+  background: #ffc83d;
+  animation: confetti-fall 2.3s ease-in forwards;
+}
+
+.confetti-layer i:nth-child(3n) { background: #00e887; }
+.confetti-layer i:nth-child(4n) { background: #855cff; }
+.confetti-layer i:nth-child(5n) { background: #4776ff; }
+.confetti-layer i:nth-child(7n) { background: #ff5252; }
+
+@keyframes confetti-fall {
+  0% { transform: translate3d(0,-20px,0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(50px,105vh,0) rotate(760deg); opacity: .2; }
+}
+
+@media (max-width: 640px) {
+  .wheel {
+    width: min(82vw, 340px);
+    border-width: 7px;
+  }
+  .wheel-center {
+    width: 66px;
+    height: 66px;
+    border-width: 6px;
+  }
+}
