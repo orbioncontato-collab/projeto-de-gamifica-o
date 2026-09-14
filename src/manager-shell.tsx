@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import "./manager-shell.css";
 
 export function ManagerShell(){
   useEffect(()=>{
