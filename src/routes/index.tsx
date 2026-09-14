@@ -8,6 +8,8 @@ import { ManagerOverviewV2 } from "../manager-overview-v2";
 import { ManagerShell } from "../manager-shell";
 import { WheelExperience } from "../wheel-experience";
 import { WheelQueue } from "../wheel-queue";
+import { WheelQuickQueue } from "../wheel-quick-queue";
+import "../wheel-attempts.css";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -21,6 +23,7 @@ function Index() {
       <ManagerOverviewV2 />
       <ManagerOverviewHider />
       <WheelExperience />
+      <WheelQuickQueue />
       <WheelQueue />
       <AdminExperience />
       <AdminRoster />
