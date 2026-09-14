@@ -3,6 +3,7 @@ import { AdminConfigCenter } from "../admin-config-center";
 import { AdminExperience } from "../admin-experience";
 import { AdminRoster } from "../admin-roster";
 import { GamificationApp } from "../gamification-app";
+import { ManagerOverviewHider } from "../manager-overview-hider";
 import { ManagerOverviewV2 } from "../manager-overview-v2";
 import { WheelExperience } from "../wheel-experience";
 import { WheelQueue } from "../wheel-queue";
@@ -16,6 +17,7 @@ function Index() {
     <>
       <GamificationApp />
       <ManagerOverviewV2 />
+      <ManagerOverviewHider />
       <WheelExperience />
       <WheelQueue />
       <AdminExperience />
