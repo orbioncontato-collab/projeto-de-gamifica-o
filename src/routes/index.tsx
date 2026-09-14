@@ -5,6 +5,7 @@ import { AdminRoster } from "../admin-roster";
 import { GamificationApp } from "../gamification-app";
 import { ManagerOverviewHider } from "../manager-overview-hider";
 import { ManagerOverviewV2 } from "../manager-overview-v2";
+import { ManagerShell } from "../manager-shell";
 import { WheelExperience } from "../wheel-experience";
 import { WheelQueue } from "../wheel-queue";
 
@@ -16,6 +17,7 @@ function Index() {
   return (
     <>
       <GamificationApp />
+      <ManagerShell />
       <ManagerOverviewV2 />
       <ManagerOverviewHider />
       <WheelExperience />
