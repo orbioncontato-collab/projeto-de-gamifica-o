@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Gift, ShieldCheck, Sparkles, X } from "lucide-react";
 import "./wheel-experience.css";
+import "./wheel-manager-approval.css";
 
 const WHEEL_KEY = "orbion-wheel-prizes-v2";
 const ACTIVE_TURN_KEY = "orbion-wheel-active-v1";
