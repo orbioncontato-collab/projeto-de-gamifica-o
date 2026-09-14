@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminExperience } from "../admin-experience";
+import { AdminRoster } from "../admin-roster";
 import { GamificationApp } from "../gamification-app";
 import { WheelExperience } from "../wheel-experience";
 
@@ -13,6 +14,7 @@ function Index() {
       <GamificationApp />
       <WheelExperience />
       <AdminExperience />
+      <AdminRoster />
     </>
   );
 }
