@@ -87,6 +87,15 @@ export function WheelExperience() {
     const setup = () => {
       const wheel = document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
       if (!wheel) return;
+
+      const mode = wheel.classList.contains("premium") ? "premium" : "classic";
+      if (wheel.dataset.enhancedMode !== mode && !spinning.current) {
+        rotation.current = 0;
+        wheel.style.transition = "none";
+        wheel.style.transform = "rotate(0deg)";
+        wheel.dataset.enhancedMode = mode;
+      }
+
       buildPrizeLabels(wheel);
       ensureStatus(wheel);
     };
@@ -129,6 +138,8 @@ export function WheelExperience() {
       if (!wheel) return;
 
       buildPrizeLabels(wheel);
+      wheel.querySelectorAll(".wheel-prize-spoke.is-selected").forEach((item) => item.classList.remove("is-selected"));
+
       const prizes = wheelPrizes(wheel);
       const status = ensureStatus(wheel);
       const index = Math.floor(Math.random() * prizes.length);
@@ -172,6 +183,9 @@ export function WheelExperience() {
         button.removeAttribute("disabled");
         button.removeAttribute("aria-busy");
         button.classList.remove("wheel-spin-button-active");
+
+        const selectedSpoke = wheel.querySelectorAll<HTMLElement>(".wheel-prize-spoke")[index];
+        selectedSpoke?.classList.add("is-selected");
 
         if (status) {
           status.dataset.locked = "true";
