@@ -11,14 +11,20 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center"
+      className="flex min-h-screen flex-col"
       style={{ backgroundColor: "#fcfbf8" }}
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+      <div className="w-full bg-red-600 px-4 py-3 text-center text-lg font-bold text-white">
+        TESTE MVP
+      </div>
+
+      <div className="flex flex-1 items-center justify-center">
+        <img
+          data-lovable-blank-page-placeholder="REMOVE_THIS"
+          src="https://cdn.gpteng.co/blank-app-v1.svg"
+          alt="Your app will live here!"
+        />
+      </div>
     </div>
   );
 }
