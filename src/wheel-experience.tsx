@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CheckCircle2, Gift, ShieldCheck, Sparkles, X } from "lucide-react";
 import "./wheel-experience.css";
 import "./wheel-manager-approval.css";
@@ -95,13 +96,15 @@ function syncPrizeLegend(wheel: HTMLElement, prizes: string[]) {
     if (list) list.dataset.wheelDynamicList = "1";
   }
   if (!list) return;
-  list.innerHTML = "";
-  prizes.forEach((prize) => {
+  const signature = JSON.stringify(prizes);
+  if (list.dataset.signature === signature) return;
+  list.dataset.signature = signature;
+  list.replaceChildren(...prizes.map((prize) => {
     const item = document.createElement("div");
     item.className = "rounded-xl border border-white/[0.06] bg-black/10 px-3 py-2 text-[11px] font-bold text-[#CBD5E1]";
     item.textContent = prize;
-    list?.appendChild(item);
-  });
+    return item;
+  }));
 }
 
 function buildPrizeLabels(wheel: HTMLElement) {
@@ -109,10 +112,8 @@ function buildPrizeLabels(wheel: HTMLElement) {
   const mode = wheelMode(wheel);
   const signature = JSON.stringify(prizes);
   const current = wheel.querySelector<HTMLElement>(":scope > .wheel-prize-layer");
-  if (current?.dataset.mode === mode && current.dataset.signature === signature) {
-    syncPrizeLegend(wheel, prizes);
-    return;
-  }
+  if (current?.dataset.mode === mode && current.dataset.signature === signature) return;
+
   current?.remove();
   const layer = document.createElement("div");
   layer.className = "wheel-prize-layer";
@@ -151,7 +152,7 @@ function getSpinButton() {
   if (tagged) return tagged;
   const candidate = Array.from(document.querySelectorAll<HTMLButtonElement>("main button")).find((button) => {
     const text = (button.textContent || "").toUpperCase();
-    return text.includes("GIRAR ROLETA") || text.includes("AGUARDANDO LIBERAÇÃO") || text.includes("VER PRÊMIO");
+    return text.includes("GIRAR ROLETA") || text.includes("VER PRÊMIO") || text.includes("AGUARDANDO LIBERAÇÃO");
   });
   if (candidate) candidate.dataset.wheelSpinControl = "1";
   return candidate || null;
@@ -163,7 +164,7 @@ function selectWheelMode(type: QueueType) {
   button?.click();
 }
 
-function syncManagerState(wheel: HTMLElement) {
+function syncManagerState(wheel: HTMLElement, force = false) {
   const active = readActive();
   let pending = readPending();
   if (pending && (!active || pending.queueId !== active.queueId)) {
@@ -176,6 +177,14 @@ function syncManagerState(wheel: HTMLElement) {
     selectWheelMode(active.type);
     return;
   }
+
+  const stateSignature = JSON.stringify({
+    mode,
+    active: active ? [active.queueId, active.personName, active.type, active.attemptsAllowed || 1, active.attemptsUsed || 0] : null,
+    pending: pending ? [pending.queueId, pending.prize] : null,
+  });
+  if (!force && wheel.dataset.managerStateSignature === stateSignature) return;
+  wheel.dataset.managerStateSignature = stateSignature;
 
   const status = ensureStatus(wheel);
   if (status && !status.dataset.locked) {
@@ -194,14 +203,11 @@ function syncManagerState(wheel: HTMLElement) {
   if (button && button.getAttribute("aria-busy") !== "true") {
     button.classList.remove("wheel-spin-locked", "wheel-spin-pending");
     button.disabled = false;
-    if (!active) {
-      button.textContent = "GIRAR ROLETA";
-    } else if (pending) {
+    if (!active) button.textContent = "GIRAR ROLETA";
+    else if (pending) {
       button.classList.add("wheel-spin-pending");
       button.textContent = `VER PRÊMIO • ${active.personName}`;
-    } else {
-      button.textContent = `GIRAR ROLETA • ${active.personName}`;
-    }
+    } else button.textContent = `GIRAR ROLETA • ${active.personName}`;
   }
 
   const section = wheel.closest("section");
@@ -232,38 +238,54 @@ export function WheelExperience() {
   const rotation = useRef(0);
   const spinning = useRef(false);
   const timers = useRef<number[]>([]);
+  const wheelRef = useRef<HTMLElement | null>(null);
 
   const flash = (text: string) => {
     setMessage(text);
-    window.setTimeout(() => setMessage(null), 2800);
+    const id = window.setTimeout(() => setMessage(null), 2400);
+    timers.current.push(id);
   };
 
   useEffect(() => {
-    const setup = () => {
+    const setup = (force = false) => {
       const wheel = document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
-      if (!wheel) return;
+      if (!wheel) {
+        wheelRef.current = null;
+        return;
+      }
+      wheelRef.current = wheel;
       const mode = wheelMode(wheel);
       if (wheel.dataset.enhancedMode !== mode && !spinning.current) {
         rotation.current = 0;
         wheel.style.transition = "none";
         wheel.style.transform = "rotate(0deg)";
         wheel.dataset.enhancedMode = mode;
+        delete wheel.dataset.managerStateSignature;
       }
       buildPrizeLabels(wheel);
-      syncManagerState(wheel);
+      syncPrizeLegend(wheel, wheelPrizes(wheel));
+      syncManagerState(wheel, force);
     };
 
-    setup();
-    const observer = new MutationObserver(() => requestAnimationFrame(setup));
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
     const refresh = () => {
-      const wheel = document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
-      wheel?.querySelector(":scope > .wheel-prize-layer")?.remove();
-      const status = wheel?.parentElement?.querySelector<HTMLElement>(":scope > .wheel-spin-status");
-      if (status) delete status.dataset.locked;
-      requestAnimationFrame(setup);
+      const wheel = wheelRef.current || document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
+      if (wheel) {
+        wheel.querySelector(":scope > .wheel-prize-layer")?.remove();
+        delete wheel.dataset.managerStateSignature;
+        const status = wheel.parentElement?.querySelector<HTMLElement>(":scope > .wheel-spin-status");
+        if (status) delete status.dataset.locked;
+      }
+      requestAnimationFrame(() => setup(true));
     };
-    const interval = window.setInterval(setup, 700);
+
+    setup(true);
+    const main = document.querySelector("main") || document.body;
+    const observer = new MutationObserver(() => {
+      if (spinning.current) return;
+      requestAnimationFrame(() => setup(false));
+    });
+    observer.observe(main, { childList: true, subtree: true });
+
     window.addEventListener("orbion-wheel-config-updated", refresh);
     window.addEventListener("orbion-wheel-turn-changed", refresh);
     window.addEventListener("orbion-wheel-queue-updated", refresh);
@@ -271,6 +293,7 @@ export function WheelExperience() {
     const addTimer = (callback: () => void, delay: number) => {
       const id = window.setTimeout(callback, delay);
       timers.current.push(id);
+      return id;
     };
 
     const handleClick = (event: MouseEvent) => {
@@ -278,20 +301,21 @@ export function WheelExperience() {
       if (!(target instanceof Element)) return;
       const button = target.closest<HTMLButtonElement>("button");
       if (!button) return;
-      const text = (button.textContent ?? "").trim().toUpperCase();
+      const text = (button.textContent || "").trim().toUpperCase();
       const active = readActive();
       const pending = readPending();
 
       const isModeButton = text.includes("ROLETA CLÁSSICA") || text.includes("ROLETA PREMIUM");
       if (isModeButton) {
         if (active) {
-          const allowed = active.type === "premium" ? text.includes("ROLETA PREMIUM") : text.includes("ROLETA CLÁSSICA");
-          if (!allowed || spinning.current) {
+          const allowedMode = active.type === "premium" ? text.includes("ROLETA PREMIUM") : text.includes("ROLETA CLÁSSICA");
+          if (!allowedMode || spinning.current) {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
           }
         }
+        requestAnimationFrame(() => setup(true));
         return;
       }
 
@@ -307,12 +331,14 @@ export function WheelExperience() {
         return;
       }
 
-      const wheel = document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
+      const wheel = wheelRef.current || document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
       if (!wheel) return;
+      wheelRef.current = wheel;
       const visibleType = wheelMode(wheel);
+
       if (active && visibleType !== active.type) {
         selectWheelMode(active.type);
-        addTimer(() => getSpinButton()?.click(), 150);
+        requestAnimationFrame(() => requestAnimationFrame(() => getSpinButton()?.click()));
         return;
       }
 
@@ -328,14 +354,13 @@ export function WheelExperience() {
       const currentNormalized = ((rotation.current % 360) + 360) % 360;
       const correction = (targetNormalized - currentNormalized + 360) % 360;
       const label = active?.personName || "Giro livre";
+      const resultMode = active?.type || visibleType;
 
       rotation.current += 360 * 10 + correction;
       spinning.current = true;
       setWon(null);
       wheel.classList.add("wheel-spinning");
-      wheel.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(0.04, 0.82, 0.12, 1)`;
-      void wheel.offsetWidth;
-      wheel.style.transform = `rotate(${rotation.current}deg)`;
+      wheel.style.willChange = "transform";
       button.disabled = true;
       button.setAttribute("aria-busy", "true");
       button.classList.add("wheel-spin-button-active");
@@ -345,43 +370,61 @@ export function WheelExperience() {
         status.innerHTML = `<span class="wheel-status-dot is-live"></span><strong>${label.toUpperCase()}</strong><span>•</span><span>Girando em alta velocidade</span>`;
       }
 
-      addTimer(() => {
-        if (status) status.innerHTML = `<span class="wheel-status-dot is-live"></span><strong>${label.toUpperCase()}</strong><span>•</span><span>Desacelerando...</span>`;
-      }, 4100);
-      addTimer(() => {
-        if (status) status.innerHTML = '<span class="wheel-status-dot is-live"></span><strong>QUASE LÁ</strong><span>•</span><span>Definindo prêmio</span>';
-      }, 6800);
-      addTimer(() => {
+      let finalized = false;
+      let fallbackId = 0;
+      const finalize = () => {
+        if (finalized) return;
+        finalized = true;
+        if (fallbackId) window.clearTimeout(fallbackId);
         spinning.current = false;
         wheel.classList.remove("wheel-spinning");
         wheel.style.transition = "none";
+        wheel.style.willChange = "auto";
         button.removeAttribute("aria-busy");
         button.classList.remove("wheel-spin-button-active");
         wheel.querySelectorAll<HTMLElement>(".wheel-prize-spoke")[index]?.classList.add("is-selected");
 
+        const createdAt = new Date().toISOString();
         if (active) {
-          const result: PendingPrize = { queueId: active.queueId, personName: active.personName, type: active.type, prize, createdAt: new Date().toISOString() };
+          const result: PendingPrize = { queueId: active.queueId, personName: active.personName, type: active.type, prize, createdAt };
           localStorage.setItem(PENDING_KEY, JSON.stringify(result));
           if (status) {
             status.dataset.locked = "true";
             status.innerHTML = `<span class="wheel-status-dot is-winner"></span><strong>PRÊMIO AGUARDANDO APROVAÇÃO</strong><span>•</span><span>${prize}</span>`;
           }
-          setWon({ prize, type: active.type, managed: true, personName: active.personName, queueId: active.queueId, createdAt: result.createdAt });
+          setWon({ prize, type: active.type, managed: true, personName: active.personName, queueId: active.queueId, createdAt });
         } else {
           if (status) {
-            delete status.dataset.locked;
+            status.dataset.locked = "true";
             status.innerHTML = `<span class="wheel-status-dot is-winner"></span><strong>RESULTADO DO GIRO LIVRE</strong><span>•</span><span>${prize}</span>`;
           }
-          setWon({ prize, type: visibleType, managed: false, createdAt: new Date().toISOString() });
+          setWon({ prize, type: resultMode, managed: false, createdAt });
         }
-        syncManagerState(wheel);
-      }, SPIN_DURATION);
+        delete wheel.dataset.managerStateSignature;
+        requestAnimationFrame(() => syncManagerState(wheel, true));
+      };
+
+      const onTransitionEnd = (transitionEvent: TransitionEvent) => {
+        if (transitionEvent.target === wheel && transitionEvent.propertyName === "transform") finalize();
+      };
+      wheel.addEventListener("transitionend", onTransitionEnd, { once: true });
+
+      requestAnimationFrame(() => {
+        wheel.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(0.04, 0.82, 0.12, 1)`;
+        wheel.style.transform = `rotate(${rotation.current}deg)`;
+        addTimer(() => {
+          if (status && spinning.current) status.innerHTML = `<span class="wheel-status-dot is-live"></span><strong>${label.toUpperCase()}</strong><span>•</span><span>Desacelerando...</span>`;
+        }, 3900);
+        addTimer(() => {
+          if (status && spinning.current) status.innerHTML = '<span class="wheel-status-dot is-live"></span><strong>QUASE LÁ</strong><span>•</span><span>Definindo prêmio</span>';
+        }, 6800);
+        fallbackId = addTimer(finalize, SPIN_DURATION + 180);
+      });
     };
 
     document.addEventListener("click", handleClick, true);
     return () => {
       observer.disconnect();
-      window.clearInterval(interval);
       window.removeEventListener("orbion-wheel-config-updated", refresh);
       window.removeEventListener("orbion-wheel-turn-changed", refresh);
       window.removeEventListener("orbion-wheel-queue-updated", refresh);
@@ -399,38 +442,52 @@ export function WheelExperience() {
     }));
     flash(`${won.prize} aprovado para ${won.personName}.`);
     setWon(null);
-    window.setTimeout(() => {
-      const wheel = document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
-      if (wheel) {
-        const status = ensureStatus(wheel);
-        if (status) delete status.dataset.locked;
-        syncManagerState(wheel);
-      }
-    }, 80);
+    requestAnimationFrame(() => {
+      const wheel = wheelRef.current || document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
+      if (!wheel) return;
+      const status = ensureStatus(wheel);
+      if (status) delete status.dataset.locked;
+      delete wheel.dataset.managerStateSignature;
+      syncManagerState(wheel, true);
+    });
   };
 
+  const closeFreeResult = () => {
+    setWon(null);
+    requestAnimationFrame(() => {
+      const wheel = wheelRef.current || document.querySelector<HTMLElement>(".wheel.premium, .wheel.classic");
+      if (!wheel) return;
+      const status = ensureStatus(wheel);
+      if (status) delete status.dataset.locked;
+      delete wheel.dataset.managerStateSignature;
+      syncManagerState(wheel, true);
+    });
+  };
+
+  const resultModal = won ? <div className="wheel-result-backdrop">
+    <div className="wheel-result-confetti" aria-hidden="true">{Array.from({ length: 22 }).map((_, index) => <i key={index} style={{ left: `${(index * 23) % 100}%`, animationDelay: `${(index % 7) * .07}s` }} />)}</div>
+    <section className="wheel-result-card" role="dialog" aria-modal="true" aria-label="Prêmio da roleta">
+      <button className="wheel-result-close" onClick={() => won.managed ? setWon(null) : closeFreeResult()} aria-label="Fechar"><X className="h-5 w-5" /></button>
+      <div className="wheel-result-icon"><Gift className="h-8 w-8" /></div>
+      <div className="wheel-result-kicker"><Sparkles className="h-4 w-4" /> PRÊMIO SORTEADO</div>
+      <h3>{won.managed ? `Parabéns, ${won.personName}!` : "Resultado do giro livre"}</h3>
+      <p>O ponteiro parou exatamente em:</p>
+      <div className="wheel-result-prize">{won.prize}</div>
+      <div className="wheel-result-manager-meta">
+        <div><span>Modo</span><strong>{won.managed ? "Giro pela fila" : "Giro livre"}</strong></div>
+        <div><span>Tipo de giro</span><strong>{won.type === "premium" ? "Roleta Premium" : "Roleta Clássica"}</strong></div>
+      </div>
+      <div className="wheel-result-proof"><CheckCircle2 className="h-4 w-4" />Mesmo prêmio exibido no setor da roleta</div>
+      {won.managed ? <>
+        <div className="wheel-result-approval-note"><ShieldCheck className="mr-1 inline h-4 w-4" />A pessoa continua na fila até você aprovar este resultado.</div>
+        <button className="wheel-result-redeem" onClick={approve}>Aprovar prêmio e concluir giro</button>
+        <button className="wheel-result-secondary" onClick={() => setWon(null)}>Fechar sem aprovar</button>
+      </> : <button className="wheel-result-redeem" onClick={closeFreeResult}>Concluir giro livre</button>}
+    </section>
+  </div> : null;
+
   return <>
-    {won && <div className="wheel-result-backdrop">
-      <div className="wheel-result-confetti" aria-hidden="true">{Array.from({ length: 34 }).map((_, index) => <i key={index} style={{ left: `${(index * 19) % 100}%`, animationDelay: `${(index % 9) * .07}s` }} />)}</div>
-      <section className="wheel-result-card" role="dialog" aria-modal="true" aria-label="Prêmio da roleta">
-        <button className="wheel-result-close" onClick={() => setWon(null)} aria-label="Fechar"><X className="h-5 w-5" /></button>
-        <div className="wheel-result-icon"><Gift className="h-8 w-8" /></div>
-        <div className="wheel-result-kicker"><Sparkles className="h-4 w-4" /> PRÊMIO SORTEADO</div>
-        <h3>{won.managed ? `Parabéns, ${won.personName}!` : "Resultado do giro livre"}</h3>
-        <p>O ponteiro parou exatamente em:</p>
-        <div className="wheel-result-prize">{won.prize}</div>
-        <div className="wheel-result-manager-meta">
-          <div><span>Modo</span><strong>{won.managed ? "Giro pela fila" : "Giro livre"}</strong></div>
-          <div><span>Tipo de giro</span><strong>{won.type === "premium" ? "Roleta Premium" : "Roleta Clássica"}</strong></div>
-        </div>
-        <div className="wheel-result-proof"><CheckCircle2 className="h-4 w-4" />Mesmo prêmio exibido no setor da roleta</div>
-        {won.managed ? <>
-          <div className="wheel-result-approval-note"><ShieldCheck className="mr-1 inline h-4 w-4" />A pessoa continua na fila até você aprovar este resultado.</div>
-          <button className="wheel-result-redeem" onClick={approve}>Aprovar prêmio e concluir giro</button>
-          <button className="wheel-result-secondary" onClick={() => setWon(null)}>Fechar sem aprovar</button>
-        </> : <button className="wheel-result-redeem" onClick={() => setWon(null)}>Concluir giro livre</button>}
-      </section>
-    </div>}
+    {typeof document !== "undefined" && resultModal ? createPortal(resultModal, document.body) : null}
     {message && <div className="wheel-redeem-toast"><ShieldCheck className="h-5 w-5" /><div><strong>Controle do gestor</strong><span> {message}</span></div></div>}
   </>;
 }
