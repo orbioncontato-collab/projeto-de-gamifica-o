@@ -48,10 +48,20 @@ export function WheelQuickQueue() {
   }, [customPeople, overrides]);
 
   useEffect(() => {
+    const load = () => {
+      setQueue(readList<QueueEntry>(QUEUE_KEY).map(item => ({ ...item, attemptsAllowed: maxAttempts(item), attemptsUsed: usedAttempts(item) })));
+      setActive(readActive());
+      setCustomPeople(readList<Person>(PEOPLE_KEY));
+      setOverrides(readMap<Partial<Person>>(OVERRIDES_KEY));
+    };
+
     const syncHost = () => {
       const main = document.querySelector<HTMLElement>("main");
       const title = main?.querySelector("h1")?.textContent || "";
-      if (!main || !title.includes("Central de Roletas")) { setHost(null); return; }
+      if (!main || !title.includes("Central de Roletas")) {
+        setHost(null);
+        return;
+      }
       let target = main.querySelector<HTMLElement>("[data-wheel-quick-queue]");
       if (!target) {
         target = document.createElement("div");
@@ -60,21 +70,28 @@ export function WheelQuickQueue() {
         if (heading && heading.parentElement === main) heading.insertAdjacentElement("afterend", target);
         else main.prepend(target);
       }
-      setHost(target);
+      setHost(current => current === target ? current : target);
+      load();
     };
-    const load = () => {
-      setQueue(readList<QueueEntry>(QUEUE_KEY).map(item => ({ ...item, attemptsAllowed: maxAttempts(item), attemptsUsed: usedAttempts(item) })));
-      setActive(readActive());
-      setCustomPeople(readList<Person>(PEOPLE_KEY));
-      setOverrides(readMap<Partial<Person>>(OVERRIDES_KEY));
+
+    const handleStorage = (event: StorageEvent) => {
+      if ([QUEUE_KEY, ACTIVE_TURN_KEY, PEOPLE_KEY, OVERRIDES_KEY].includes(event.key || "")) load();
     };
-    syncHost(); load();
+
+    syncHost();
+    const main = document.querySelector("main") || document.body;
     const observer = new MutationObserver(() => requestAnimationFrame(syncHost));
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-    const timer = window.setInterval(load, 650);
+    observer.observe(main, { childList: true, subtree: true });
     window.addEventListener("orbion-wheel-queue-updated", load);
     window.addEventListener("orbion-wheel-turn-changed", load);
-    return () => { observer.disconnect(); window.clearInterval(timer); window.removeEventListener("orbion-wheel-queue-updated", load); window.removeEventListener("orbion-wheel-turn-changed", load); };
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("orbion-wheel-queue-updated", load);
+      window.removeEventListener("orbion-wheel-turn-changed", load);
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   const flash = (message: string) => { setToast(message); window.setTimeout(() => setToast(null), 2400); };
@@ -82,48 +99,74 @@ export function WheelQuickQueue() {
   const attemptsAllowed = attemptsUnlocked ? Math.max(1, Math.min(20, attempts)) : 1;
 
   const add = () => {
-    let personName = ""; let selectedId: string | undefined; let source: "manual" | "earned" = "earned";
+    let personName = "";
+    let selectedId: string | undefined;
+    let source: "manual" | "earned" = "earned";
     if (manual) {
-      personName = manualName.trim(); source = "manual";
+      personName = manualName.trim();
+      source = "manual";
       if (!personName) return flash("Digite o nome da pessoa.");
     } else {
       const person = people.find(item => item.id === personId);
       if (!person) return flash("Selecione um colaborador.");
-      personName = person.name; selectedId = person.id;
+      personName = person.name;
+      selectedId = person.id;
     }
-    const entry: QueueEntry = { id: `queue-${Date.now()}`, personId: selectedId, personName, type, source, createdAt: new Date().toISOString(), attemptsAllowed, attemptsUsed: 0 };
-    saveQueue([...queue, entry]); setManualName("");
+    const entry: QueueEntry = {
+      id: `queue-${Date.now()}`,
+      personId: selectedId,
+      personName,
+      type,
+      source,
+      createdAt: new Date().toISOString(),
+      attemptsAllowed,
+      attemptsUsed: 0,
+    };
+    saveQueue([...queue, entry]);
+    setManualName("");
     flash(`${personName} entrou na fila com ${attemptsAllowed} tentativa${attemptsAllowed === 1 ? "" : "s"}.`);
   };
 
   const release = (entry: QueueEntry) => {
     if (active && active.queueId !== entry.id) return flash(`Finalize a vez de ${active.personName} antes de liberar outra pessoa.`);
-    const turn: ActiveTurn = { queueId: entry.id, personId: entry.personId, personName: entry.personName, type: entry.type, startedAt: new Date().toISOString(), attemptsAllowed: maxAttempts(entry), attemptsUsed: usedAttempts(entry) };
-    localStorage.setItem(ACTIVE_TURN_KEY, JSON.stringify(turn)); setActive(turn);
+    const turn: ActiveTurn = {
+      queueId: entry.id,
+      personId: entry.personId,
+      personName: entry.personName,
+      type: entry.type,
+      startedAt: new Date().toISOString(),
+      attemptsAllowed: maxAttempts(entry),
+      attemptsUsed: usedAttempts(entry),
+    };
+    localStorage.setItem(ACTIVE_TURN_KEY, JSON.stringify(turn));
+    setActive(turn);
     window.dispatchEvent(new CustomEvent("orbion-wheel-turn-changed", { detail: turn }));
     selectWheelMode(entry.type);
     flash(`${entry.personName}: tentativa ${usedAttempts(entry) + 1} de ${maxAttempts(entry)} liberada.`);
   };
 
   if (!host) return toast ? <div className="wheel-quick-toast"><Check />{toast}</div> : null;
-  return <>{createPortal(<section className="wheel-quick-panel">
-    <div className="wheel-quick-head"><div><span>CONTROLE RÁPIDO DO GESTOR</span><h2>Adicionar à fila da roleta</h2><p>Cadastre, defina a roleta e libere o giro sem sair do quadro principal.</p></div><div className={`wheel-quick-status ${active ? "live" : ""}`}><i />{active ? `Vez de ${active.personName}` : `${queue.length} na fila`}</div></div>
+  return <>
+    {createPortal(<section className="wheel-quick-panel">
+      <div className="wheel-quick-head"><div><span>CONTROLE RÁPIDO DO GESTOR</span><h2>Adicionar à fila da roleta</h2><p>Cadastre, defina a roleta e libere o giro sem sair do quadro principal.</p></div><div className={`wheel-quick-status ${active ? "live" : ""}`}><i />{active ? `Vez de ${active.personName}` : `${queue.length} na fila`}</div></div>
 
-    <div className="wheel-quick-controls">
-      <div className="wheel-quick-source"><button className={!manual ? "active" : ""} onClick={() => setManual(false)}><Users />Colaborador</button><button className={manual ? "active" : ""} onClick={() => setManual(true)}><UserPlus />Manual</button></div>
-      {manual ? <input className="wheel-quick-input" value={manualName} onChange={e => setManualName(e.target.value)} placeholder="Nome da pessoa" /> : <select className="wheel-quick-input" value={personId} onChange={e => setPersonId(e.target.value)}>{people.map(person => <option key={person.id} value={person.id}>{person.name} · {person.role}</option>)}</select>}
-      <select className="wheel-quick-input" value={type} onChange={e => setType(e.target.value as QueueType)}><option value="classic">Roleta Clássica</option><option value="premium">Roleta Premium</option></select>
-      <div className="wheel-quick-attempts"><button className={attemptsUnlocked ? "unlocked" : ""} onClick={() => { setAttemptsUnlocked(value => !value); if (attemptsUnlocked) setAttempts(1); }} title="Destravar mais tentativas">{attemptsUnlocked ? <Unlock /> : <Lock />}</button><input type="number" min="1" max="20" disabled={!attemptsUnlocked} value={attemptsUnlocked ? attempts : 1} onChange={e => setAttempts(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} /><span>tentativa{attemptsAllowed === 1 ? "" : "s"}</span></div>
-      <button className="wheel-quick-add" onClick={add}><CirclePlus />Adicionar à fila</button>
-    </div>
-    <div className="wheel-quick-lock-note">{attemptsUnlocked ? <><Unlock />Limite destravado. Você pode liberar até 20 tentativas para esta entrada.</> : <><Lock />Padrão protegido em 1 tentativa. Clique no cadeado para permitir mais.</>}</div>
+      <div className="wheel-quick-controls">
+        <div className="wheel-quick-source"><button className={!manual ? "active" : ""} onClick={() => setManual(false)}><Users />Colaborador</button><button className={manual ? "active" : ""} onClick={() => setManual(true)}><UserPlus />Manual</button></div>
+        {manual ? <input className="wheel-quick-input" value={manualName} onChange={e => setManualName(e.target.value)} placeholder="Nome da pessoa" /> : <select className="wheel-quick-input" value={personId} onChange={e => setPersonId(e.target.value)}>{people.map(person => <option key={person.id} value={person.id}>{person.name} · {person.role}</option>)}</select>}
+        <select className="wheel-quick-input" value={type} onChange={e => setType(e.target.value as QueueType)}><option value="classic">Roleta Clássica</option><option value="premium">Roleta Premium</option></select>
+        <div className="wheel-quick-attempts"><button className={attemptsUnlocked ? "unlocked" : ""} onClick={() => { setAttemptsUnlocked(value => !value); if (attemptsUnlocked) setAttempts(1); }} title="Destravar mais tentativas">{attemptsUnlocked ? <Unlock /> : <Lock />}</button><input type="number" min="1" max="20" disabled={!attemptsUnlocked} value={attemptsUnlocked ? attempts : 1} onChange={e => setAttempts(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} /><span>tentativa{attemptsAllowed === 1 ? "" : "s"}</span></div>
+        <button className="wheel-quick-add" onClick={add}><CirclePlus />Adicionar à fila</button>
+      </div>
+      <div className="wheel-quick-lock-note">{attemptsUnlocked ? <><Unlock />Limite destravado. Você pode liberar até 20 tentativas para esta entrada.</> : <><Lock />Padrão protegido em 1 tentativa. Clique no cadeado para permitir mais.</>}</div>
 
-    {queue.length > 0 && <div className="wheel-quick-line">{queue.slice(0, 4).map(entry => {
-      const isActive = active?.queueId === entry.id;
-      const remaining = Math.max(0, maxAttempts(entry) - usedAttempts(entry));
-      return <article key={entry.id} className={isActive ? "active" : ""}><div><strong>{entry.personName}</strong><span>{entry.type === "premium" ? "Premium" : "Clássica"} · {remaining} tentativa{remaining === 1 ? "" : "s"} restante{remaining === 1 ? "" : "s"}</span></div><button disabled={!!active && !isActive} onClick={() => release(entry)}>{isActive ? <><Zap />Liberado</> : <><Play />Liberar giro</>}</button></article>;
-    })}{queue.length > 4 && <div className="wheel-quick-more">+{queue.length - 4} na fila</div>}</div>}
-  </section>, host)}{toast && <div className="wheel-quick-toast"><Check />{toast}</div>}</>;
+      {queue.length > 0 && <div className="wheel-quick-line">{queue.slice(0, 4).map(entry => {
+        const isActive = active?.queueId === entry.id;
+        const remaining = Math.max(0, maxAttempts(entry) - usedAttempts(entry));
+        return <article key={entry.id} className={isActive ? "active" : ""}><div><strong>{entry.personName}</strong><span>{entry.type === "premium" ? "Premium" : "Clássica"} · {remaining} tentativa{remaining === 1 ? "" : "s"} restante{remaining === 1 ? "" : "s"}</span></div><button disabled={!!active && !isActive} onClick={() => release(entry)}>{isActive ? <><Zap />Liberado</> : <><Play />Liberar giro</>}</button></article>;
+      })}{queue.length > 4 && <div className="wheel-quick-more">+{queue.length - 4} na fila</div>}</div>}
+    </section>, host)}
+    {toast && <div className="wheel-quick-toast"><Check />{toast}</div>}
+  </>;
 }
 
 function selectWheelMode(type: QueueType) {
