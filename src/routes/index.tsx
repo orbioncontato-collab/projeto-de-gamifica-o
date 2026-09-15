@@ -6,6 +6,7 @@ import { GamificationApp } from "../gamification-app";
 import { ManagerOverviewHider } from "../manager-overview-hider";
 import { ManagerOverviewV2 } from "../manager-overview-v2";
 import { ManagerShell } from "../manager-shell";
+import { ThemeController } from "../theme-controller";
 import { WheelExperience } from "../wheel-experience";
 import { WheelQueue } from "../wheel-queue";
 import { WheelQuickQueue } from "../wheel-quick-queue";
@@ -19,6 +20,7 @@ function Index() {
   return (
     <>
       <GamificationApp />
+      <ThemeController />
       <ManagerShell />
       <ManagerOverviewV2 />
       <ManagerOverviewHider />
