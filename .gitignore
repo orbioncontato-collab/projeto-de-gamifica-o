@@ -31,3 +31,6 @@ npm-debug.log*
 
 # TypeScript incremental
 *.tsbuildinfo
+
+# Config local do Claude Code
+.claude/
