@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useFieldA11y } from './field-context'
 
 const Select = SelectPrimitive.Root
 const SelectGroup = SelectPrimitive.Group
@@ -10,21 +11,25 @@ const SelectValue = SelectPrimitive.Value
 const SelectTrigger = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'field-input flex h-11 items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-placeholder [&>span]:line-clamp-1',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-))
+>(({ className, children, 'aria-describedby': describedBy, 'aria-invalid': invalid, ...props }, ref) => {
+  const a11y = useFieldA11y({ 'aria-describedby': describedBy, 'aria-invalid': invalid })
+  return (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        'field-input flex h-11 items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-placeholder [&>span]:line-clamp-1',
+        className,
+      )}
+      {...props}
+      {...a11y}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  )
+})
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
 const SelectScrollUpButton = React.forwardRef<

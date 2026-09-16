@@ -73,7 +73,7 @@ export function ChallengesPage({ openNew, manage }: ChallengesPageProps) {
             title="A próxima temporada ainda não começou"
             description="Os desafios pertencem a uma temporada. Assim que uma temporada estiver ativa, eles aparecem aqui."
             adminHint="Crie ou ative uma temporada em Configurações › Temporadas."
-            {...(isAdmin ? { action: { label: 'Criar/ativar temporada', to: '/admin/configuracoes' } } : {})}
+            {...(isAdmin ? { action: { label: 'Criar/ativar temporada', to: '/admin/configuracoes', search: { aba: 'temporadas' } } } : {})}
           />
         ) : (
           <QueryBoundary query={board} skeleton={<BoardSkeleton />}>

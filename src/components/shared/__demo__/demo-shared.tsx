@@ -167,8 +167,6 @@ export function SharedDemos({ avatarColors }: SharedDemosProps) {
             id="money-err"
             value={null}
             onChange={() => undefined}
-            aria-invalid
-            aria-describedby="money-err-error"
           />
         </FormField>
       </Demo>

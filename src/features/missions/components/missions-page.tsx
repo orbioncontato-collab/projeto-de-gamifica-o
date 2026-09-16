@@ -77,7 +77,7 @@ export function MissionsPage({ filter, openNew }: MissionsPageProps) {
             title="A próxima temporada ainda não começou"
             description="As missões pertencem a uma temporada. Assim que uma temporada estiver ativa, elas aparecem aqui."
             adminHint="Crie ou ative uma temporada em Configurações › Temporadas."
-            {...(isAdmin ? { action: { label: 'Criar/ativar temporada', to: '/admin/configuracoes' } } : {})}
+            {...(isAdmin ? { action: { label: 'Criar/ativar temporada', to: '/admin/configuracoes', search: { aba: 'temporadas' } } } : {})}
           />
         ) : (
           <QueryBoundary query={board} skeleton={<BoardSkeleton />}>

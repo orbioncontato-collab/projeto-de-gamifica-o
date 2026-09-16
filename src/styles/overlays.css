@@ -51,7 +51,7 @@
   max-width: min(100%, 420px);
 }
 
-/* confete (portado do Lovable, sem !important) */
+/* confete (sem !important) */
 .confetti-layer {
   position: fixed;
   inset: 0;

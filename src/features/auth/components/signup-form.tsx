@@ -78,7 +78,6 @@ export function SignupForm({ mode, onNeedsEmailConfirmation }: SignupFormProps) 
           id="signup-name"
           autoComplete="name"
           placeholder="Como você quer aparecer no ranking"
-          aria-invalid={Boolean(errors.fullName) || undefined}
           {...form.register('fullName')}
         />
       </FormField>
@@ -89,7 +88,6 @@ export function SignupForm({ mode, onNeedsEmailConfirmation }: SignupFormProps) 
           autoComplete="email"
           inputMode="email"
           placeholder="voce@empresa.com.br"
-          aria-invalid={Boolean(errors.email) || undefined}
           {...form.register('email')}
         />
       </FormField>
@@ -103,7 +101,6 @@ export function SignupForm({ mode, onNeedsEmailConfirmation }: SignupFormProps) 
         <PasswordInput
           id="signup-password"
           autoComplete="new-password"
-          aria-invalid={Boolean(errors.password) || undefined}
           {...form.register('password')}
         />
       </FormField>
@@ -116,7 +113,6 @@ export function SignupForm({ mode, onNeedsEmailConfirmation }: SignupFormProps) 
         <PasswordInput
           id="signup-confirm"
           autoComplete="new-password"
-          aria-invalid={Boolean(errors.confirmPassword) || undefined}
           {...form.register('confirmPassword')}
         />
       </FormField>
@@ -136,7 +132,6 @@ export function SignupForm({ mode, onNeedsEmailConfirmation }: SignupFormProps) 
             placeholder="XXXX-XXXX-XXXX"
             maxLength={TEAM_CODE_MASKED_LENGTH}
             className="font-mono uppercase tracking-[0.18em]"
-            aria-invalid={Boolean(errors.teamCode) || undefined}
             {...teamCodeField}
             onChange={onTeamCodeChange}
           />

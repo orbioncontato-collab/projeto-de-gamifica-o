@@ -62,17 +62,25 @@ supabase/        # migrations, schema.sql gerado e testes PGlite do banco
 docs/spec/       # especificações e handoffs entre pacotes de trabalho
 ```
 
-## Deploy (resumo)
+## Deploy (resumo — o passo a passo completo, com capturas, está no Manual em PDF)
 
-1. **Banco primeiro.** Instale o schema no projeto Supabase seguindo `supabase/README.md`
-   (ordem obrigatória em `docs/spec/DATA-MODEL.md` §16.1 — "Manual de implantação").
-2. **Vercel.** Importe o repositório; `vercel.json` já define framework Vite, `npm run build`,
+1. **Banco primeiro.** Crie o projeto no Supabase (região São Paulo), cole `supabase/schema.sql`
+   inteiro no SQL Editor e rode (`supabase/README.md`). Confira o fuso em `app_settings`
+   (padrão `America/Sao_Paulo`) — ele trava depois do primeiro lançamento.
+2. **Primeiro gestor, ANTES de publicar.** Supabase → Authentication → Users → *Add user* →
+   *Create new user* com **Auto confirm** marcado. O primeiro usuário do banco vira gestor; se a
+   URL for publicada antes disso, o primeiro visitante que se cadastrar vira gestor
+   (recuperação em `docs/spec/DATA-MODEL.md` §16.4).
+3. **Auth.** Authentication → Sign In / Providers → Email: desligue *Confirm email* (o e-mail
+   nativo do Supabase só entrega para membros da organização). Para "esqueci a senha" funcionar
+   para o time, configure SMTP próprio em Authentication → Emails → SMTP Settings (§16.2).
+4. **Vercel.** Importe o repositório; `vercel.json` já define framework Vite, `npm run build`,
    saída `dist/` e o rewrite de SPA. Cadastre `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`
-   em Project → Settings → Environment Variables (Production **e** Preview) e faça o deploy
-   (`docs/spec/FRONTEND-ARCH.md` §8).
-3. **Auth.** No Supabase → Authentication → URL Configuration, cadastre a URL da Vercel como
-   Site URL e nos Redirect URLs (`docs/spec/DATA-MODEL.md` §16.2 para e-mail/confirmação).
-4. **Primeiro acesso.** Abra `/signup`: o primeiro cadastro vira o gestor; os demais entram com o
-   código da equipe e aguardam aprovação em `/aguardando`.
+   em Project → Settings → Environment Variables (Production **e** Preview) e faça o deploy.
+5. **URL de volta no Supabase.** Authentication → URL Configuration: Site URL = endereço da Vercel;
+   Redirect URLs = `https://<app>.vercel.app/**` e, para previews, `https://*-<sua-conta>.vercel.app/**`.
+6. **Primeiro acesso.** Entre com o gestor, ajuste empresa/temporada/código da equipe em
+   Administração → Configurações; os colaboradores entram em `/signup` com o código e aguardam
+   aprovação em Administração → Equipe → Pendentes.
 
 CI mínimo recomendado em cada PR: `npm ci && npm run lint && npm run typecheck && npm test && npm run build`.

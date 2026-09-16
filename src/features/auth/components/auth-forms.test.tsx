@@ -54,7 +54,11 @@ describe('LoginForm', () => {
   test('validates before calling the API', async () => {
     renderInRouter(<LoginForm />)
     await userEvent.click(await screen.findByRole('button', { name: 'Entrar' }))
-    expect(await screen.findByText('Informe um e-mail válido.')).toBeInTheDocument()
+    const error = await screen.findByText('Informe um e-mail válido.')
+    expect(error).toHaveAttribute('id', 'login-email-error')
+    const email = screen.getByLabelText(/E-mail/)
+    expect(email).toHaveAttribute('aria-describedby', 'login-email-error')
+    expect(email).toHaveAttribute('aria-invalid', 'true')
     expect(signIn).not.toHaveBeenCalled()
   })
 })

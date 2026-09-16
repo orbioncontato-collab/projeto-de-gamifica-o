@@ -54,7 +54,6 @@ export function LoginForm({ redirect }: LoginFormProps) {
           autoComplete="email"
           inputMode="email"
           placeholder="voce@empresa.com.br"
-          aria-invalid={Boolean(errors.email) || undefined}
           {...form.register('email')}
         />
       </FormField>
@@ -63,7 +62,6 @@ export function LoginForm({ redirect }: LoginFormProps) {
           id="login-password"
           autoComplete="current-password"
           placeholder="Sua senha"
-          aria-invalid={Boolean(errors.password) || undefined}
           {...form.register('password')}
         />
       </FormField>
