@@ -1,7 +1,7 @@
-import type { RegisteredRouter, RoutePaths } from '@tanstack/react-router'
+import type { LinkProps } from '@tanstack/react-router'
 
-/** Caminhos de rota válidos (união gerada pelo router). */
-export type LinkTo = RoutePaths<RegisteredRouter['routeTree']>
+/** Caminhos de rota válidos (união gerada pelo router; `RoutePaths` não é exportado pelo pacote). */
+export type LinkTo = NonNullable<LinkProps['to']>
 
 /** Tons semânticos + apelidos (success/warning/danger/info/muted) aceitos por Badge, StatCard, IconTile, StatusPill. */
 export type BaseTone = 'green' | 'gold' | 'red' | 'blue' | 'purple' | 'cyan' | 'dark'

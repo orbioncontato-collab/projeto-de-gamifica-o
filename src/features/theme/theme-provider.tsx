@@ -9,14 +9,16 @@ import {
   type Theme,
 } from './use-theme'
 
-const THEME_COLOR: Record<Theme, string> = { dark: '#07111F', light: '#F4F7FB' }
+/** `<meta theme-color>` segue o `--bg` do tema aplicado (tokens.css é a única fonte de cores). */
+const themeColorFor = (): string => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()
 
 /** Único lugar do app que escreve em `html[data-theme]` e `localStorage['orbion-theme']` (FRONTEND-ARCH §5.5). */
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset['theme'] = theme
   document.documentElement.style.colorScheme = theme
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', THEME_COLOR[theme])
+  const bg = themeColorFor()
+  if (meta && bg) meta.setAttribute('content', bg)
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

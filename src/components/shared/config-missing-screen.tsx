@@ -15,20 +15,25 @@ export function ConfigMissingScreen() {
           O app ainda não está conectado ao Supabase
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Defina as variáveis de ambiente abaixo e publique novamente. Localmente, copie <code className="font-mono text-text-2">.env.example</code>{' '}
-          para <code className="font-mono text-text-2">.env.local</code>; na Vercel, em Project → Settings → Environment Variables
-          (Production e Preview) e faça um novo deploy.
+          Defina as variáveis de ambiente abaixo e publique novamente. Localmente, copie{' '}
+          <code className="font-mono text-text-2">.env.example</code> para{' '}
+          <code className="font-mono text-text-2">.env.local</code>; na Vercel, em Project → Settings →
+          Environment Variables (Production e Preview) e faça um novo deploy.
         </p>
         <ul className="mt-4 space-y-2">
           {missing.map((name) => (
-            <li key={name} className="rounded-xl border border-red/25 bg-red/10 px-3 py-2 font-mono text-xs font-bold text-red-soft">
+            <li
+              key={name}
+              className="rounded-xl border border-red/25 bg-red/10 px-3 py-2 font-mono text-xs font-bold text-red-soft"
+            >
               {name}
             </li>
           ))}
         </ul>
         <p className="mt-4 text-xs text-muted-2">
-          Os valores estão em Supabase → Project Settings → API. Use a chave <strong className="text-text-2">publishable</strong>{' '}
-          (sb_publishable_…); nunca a secret/service_role. Guia completo em <span className="font-mono">supabase/README.md</span>.
+          Os valores estão em Supabase → Project Settings → API. Use a chave{' '}
+          <strong className="text-text-2">publishable</strong> (sb_publishable_…); nunca a
+          secret/service_role. Guia completo em <span className="font-mono">supabase/README.md</span>.
         </p>
       </section>
     </main>

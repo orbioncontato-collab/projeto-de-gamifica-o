@@ -27,13 +27,16 @@ export const supabase = createClient<Database>(url || PLACEHOLDER_URL, key || PL
 
 /** Chama uma RPC e converte { data, error } em valor | throw RpcError. */
 export async function callRpc<N extends RpcName>(name: N, args?: RpcArgs<N>): Promise<RpcResult<N>> {
-  const { data, error } = await supabase.rpc(name, args as never)
+  const { data, error } = await supabase.rpc(name, args as RpcArgs<RpcName>)
   if (error) throw RpcError.fromPostgrest(error)
-  return data as RpcResult<N>
+  // O banco devolve `Json`; o formato real é o payload tipado de DATA-MODEL §7 (RpcPayloads).
+  return data as unknown as RpcResult<N>
 }
 
 /** Idem para builders do PostgREST: unwrap(supabase.from('rewards').select()) */
-export async function unwrap<T>(q: PromiseLike<{ data: T | null; error: PostgrestError | null }>): Promise<T> {
+export async function unwrap<T>(
+  q: PromiseLike<{ data: T | null; error: PostgrestError | null }>,
+): Promise<T> {
   const { data, error } = await q
   if (error) throw RpcError.fromPostgrest(error)
   return data as T

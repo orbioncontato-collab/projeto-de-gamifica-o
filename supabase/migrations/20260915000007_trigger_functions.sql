@@ -127,7 +127,8 @@ begin
     NEW.base_points := -v_orig.base_points;
     NEW.multiplier := 1;
     NEW.rule_id := v_orig.rule_id;
-    NEW.source := v_orig.source;                -- DECISIONS.md #1: estorno herda a source da original
+    -- §7.4 / DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce 'system'; demais sources herdam
+    NEW.source := case when v_orig.source in ('rule', 'manual', 'system') then 'system'::public.entry_source else v_orig.source end;
     NEW.special_event_id := null;
     NEW.boost_id := null;
   else
@@ -304,7 +305,7 @@ begin
     crm_updates = ss.crm_updates + case when v_is_fact and NEW.metric = 'crm_update' then NEW.quantity * v_sign else 0 end,
     lead_recoveries = ss.lead_recoveries + case when v_is_fact and NEW.metric = 'lead_recovery' then NEW.quantity * v_sign else 0 end,
     upsells = ss.upsells + case when v_is_fact and NEW.metric = 'upsell' then NEW.quantity * v_sign else 0 end,
-    activities_count = ss.activities_count + case when NEW.source in ('rule', 'manual')
+    activities_count = ss.activities_count + case when (case when v_is_reversal then v_orig.source else NEW.source end) in ('rule', 'manual')
         and (NEW.metric is null or NEW.metric not in ('amount_step', 'weekly_goal', 'monthly_goal', 'custom'))
         then NEW.quantity * v_sign else 0 end,
     last_entry_at = case when v_counts then greatest(coalesce(ss.last_entry_at, NEW.occurred_at), NEW.occurred_at) else ss.last_entry_at end,
@@ -320,7 +321,8 @@ begin
     sales_amount = ls.sales_amount + case when v_is_fact and NEW.metric in ('sale', 'upsell') then coalesce(NEW.amount, 0) else 0 end,
     sales_count = ls.sales_count + case when v_is_fact and NEW.metric = 'sale' then NEW.quantity * v_sign else 0 end,
     first_sale_at = case when not v_is_reversal and v_is_fact and NEW.metric = 'sale' and coalesce(NEW.amount, 0) > 0
-                         then coalesce(ls.first_sale_at, NEW.occurred_at) else ls.first_sale_at end,
+                         -- least(): venda retroativa (occurred_at anterior) reproduz o min(occurred_at) de recompute_stats (§7.2)
+                         then least(ls.first_sale_at, NEW.occurred_at) else ls.first_sale_at end,
     updated_at = pg_catalog.now()
   where ls.profile_id = NEW.profile_id
   returning ls.* into v_ls;
@@ -339,6 +341,13 @@ begin
     end if;
   elsif v_is_reversal and v_orig_counts then
     perform private.recompute_streak(NEW.profile_id);
+    -- DECISIONS.md (SQL fixer r2): a original deixa de contar como atividade (§4.8) — last_entry_at da temporada
+    -- é recalculado do ledger para reproduzir recompute_stats (§7.2); greatest() sozinho manteria a data estornada.
+    update public.profile_season_stats ss
+       set last_entry_at = (select max(e.occurred_at) from public.point_entries e
+                             where e.profile_id = NEW.profile_id and e.season_id = NEW.season_id and private.counts_for_streak(e)),
+           updated_at = pg_catalog.now()
+     where ss.profile_id = NEW.profile_id and ss.season_id = NEW.season_id;
   end if;
   select * into v_ls from public.profile_lifetime_stats ls where ls.profile_id = NEW.profile_id;
 

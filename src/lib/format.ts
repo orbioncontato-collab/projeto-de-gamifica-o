@@ -5,7 +5,7 @@
 
 export const DEFAULT_TZ = 'America/Sao_Paulo'
 const LOCALE = 'pt-BR'
-const NBSP = / /g
+const NBSP = /\u00A0/g // Intl pt-BR separa "R$" do número com NBSP
 
 const normalizeSpaces = (s: string): string => s.replace(NBSP, ' ')
 const safe = (n: number): number => (Number.isFinite(n) ? n : 0)
@@ -28,7 +28,9 @@ export const formatBRL = (n: number, opts?: { compact?: boolean; cents?: boolean
 
 export const formatNumber = (n: number, digits = 0): string =>
   normalizeSpaces(
-    new Intl.NumberFormat(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(safe(n)),
+    new Intl.NumberFormat(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(
+      safe(n),
+    ),
   )
 
 /** "1.850 pts" — sinal tipográfico quando negativo: "−200 pts" */
@@ -124,7 +126,7 @@ export const formatDaysLeft = (days: number): string => {
   return `finaliza em ${d} ${d === 1 ? 'dia' : 'dias'}`
 }
 
-/** "Marcelo Alves" → "MA" (primeira e última palavra; nome único → 2 primeiras letras) */
+/** "Nome Sobrenome" → "NS" (primeira e última palavra; nome único → 2 primeiras letras) */
 export const initials = (fullName: string): string => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '?'
@@ -138,6 +140,23 @@ export const firstName = (fullName: string): string => fullName.trim().split(/\s
 export const maskTeamCode = (code: string): string => {
   const clean = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
   return clean.replace(/(.{4})(?=.)/g, '$1-')
+}
+
+const TEAM_CODE_VISIBLE_TAIL = 4
+
+/** "A3F9-C21B-7E04" → "••••-••••-7E04" (só os 4 últimos visíveis, DATA-MODEL §4.2). */
+export const hideTeamCode = (masked: string): string => {
+  if (masked.length <= TEAM_CODE_VISIBLE_TAIL) return masked
+  return (
+    masked.slice(0, -TEAM_CODE_VISIBLE_TAIL).replace(/[A-Z0-9]/gi, '•') +
+    masked.slice(-TEAM_CODE_VISIBLE_TAIL)
+  )
+}
+
+/** "YYYY-MM-DD" → "DD/MM/YYYY" sem passar por `Date` (dia de calendário, não vira o dia no fuso). */
+export const formatLocalDay = (day: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day)
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : day
 }
 
 export const pluralize = (n: number, singular: string, plural: string): string =>

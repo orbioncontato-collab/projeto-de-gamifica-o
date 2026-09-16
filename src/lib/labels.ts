@@ -70,7 +70,10 @@ export const PRIZE_KIND_LABELS: Record<PrizeKind, string> = {
   mystery: 'Mystery Box',
   custom: 'Outro',
 }
-export const WHEEL_KIND_LABELS: Record<WheelKind, string> = { classic: 'Roleta Clássica', premium: 'Roleta Premium' }
+export const WHEEL_KIND_LABELS: Record<WheelKind, string> = {
+  classic: 'Roleta Clássica',
+  premium: 'Roleta Premium',
+}
 export const REDEMPTION_STATUS_LABELS: Record<RedemptionStatus, string> = {
   requested: 'Solicitado',
   approved: 'Aprovado',

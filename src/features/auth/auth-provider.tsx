@@ -14,7 +14,9 @@ const INITIAL: AuthState = { status: 'loading', session: null, userId: null }
 const AuthContext = createContext<AuthState>(INITIAL)
 
 const fromSession = (session: Session | null): AuthState =>
-  session ? { status: 'signed_in', session, userId: session.user.id } : { status: 'signed_out', session: null, userId: null }
+  session
+    ? { status: 'signed_in', session, userId: session.user.id }
+    : { status: 'signed_out', session: null, userId: null }
 
 /**
  * Estado de sessão do Supabase (FRONTEND-ARCH §3.1). O callback de `onAuthStateChange` só faz setState —

@@ -1,0 +1,105 @@
+/* Camadas flutuantes: toast (sonner), confete e brilho pulsante. Importado por components.css. */
+
+/* toast (sonner) — sem !important: variáveis do sonner + seletores mais específicos que os dele */
+[data-sonner-toaster] {
+  --normal-bg: var(--bg-elevated);
+  --normal-border: color-mix(in oklab, var(--accent) 20%, transparent);
+  --normal-text: var(--text);
+  --success-bg: var(--bg-elevated);
+  --success-border: color-mix(in oklab, var(--accent) 20%, transparent);
+  --success-text: var(--text);
+  --error-bg: var(--bg-elevated);
+  --error-border: color-mix(in oklab, var(--red) 30%, transparent);
+  --error-text: var(--text);
+  --warning-bg: var(--bg-elevated);
+  --warning-border: color-mix(in oklab, var(--gold) 30%, transparent);
+  --warning-text: var(--text);
+  --border-radius: 1rem;
+  font-family: var(--font-sans);
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast][data-styled='true'] {
+  box-shadow: var(--shadow-modal);
+  font-weight: 700;
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast][data-type='error'] {
+  border-color: color-mix(in oklab, var(--red) 30%, transparent);
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast][data-type='warning'] {
+  border-color: color-mix(in oklab, var(--gold) 30%, transparent);
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast] [data-description] {
+  color: var(--muted);
+  font-weight: 500;
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast] [data-icon] {
+  color: var(--accent);
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast][data-type='error'] [data-icon] {
+  color: var(--red);
+}
+[data-sonner-toaster] .orbion-toast[data-sonner-toast][data-type='warning'] [data-icon] {
+  color: var(--gold);
+}
+@media (max-width: 1023px) {
+  :root {
+    /* acima do bottom nav (≈72px) + área segura do iPhone; o toast nunca fica escondido atrás da barra */
+    --toast-offset: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* toasts empilhados/expandidos continuam legíveis em telas estreitas */
+[data-sonner-toaster] [data-sonner-toast] {
+  max-width: min(100%, 420px);
+}
+
+/* confete (portado do Lovable, sem !important) */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 80;
+}
+.confetti-layer i {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--gold);
+  animation: confetti-fall 2.6s ease-in forwards;
+}
+.confetti-layer i:nth-child(3n) {
+  background: var(--accent);
+}
+.confetti-layer i:nth-child(4n) {
+  background: var(--purple);
+}
+.confetti-layer i:nth-child(5n) {
+  background: var(--blue);
+}
+.confetti-layer i:nth-child(7n) {
+  background: var(--red);
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(50px, 105vh, 0) rotate(760deg);
+    opacity: 0.2;
+  }
+}
+
+@keyframes orbion-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+.pulse-glow {
+  animation: orbion-pulse-glow 1.8s ease-in-out infinite;
+}

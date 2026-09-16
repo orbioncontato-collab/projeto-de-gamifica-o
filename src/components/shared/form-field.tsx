@@ -13,7 +13,15 @@ export interface FormFieldProps {
 }
 
 /** Rótulo `.field-label` + campo + erro/dica. Passe `htmlFor` igual ao `id` do input. */
-export function FormField({ label, htmlFor, error, hint, required = false, children, className }: FormFieldProps) {
+export function FormField({
+  label,
+  htmlFor,
+  error,
+  hint,
+  required = false,
+  children,
+  className,
+}: FormFieldProps) {
   const errorId = htmlFor ? `${htmlFor}-error` : undefined
   return (
     <div className={cn('block', className)}>

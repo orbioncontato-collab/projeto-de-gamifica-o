@@ -6,10 +6,18 @@ export const qk = {
   signupMode: () => ['signup-mode'] as const,
   dashboard: {
     all: () => ['dashboard'] as const,
-    one: (profileId: string | null, seasonId: string | null) => ['dashboard', 'one', profileId, seasonId] as const,
+    one: (profileId: string | null, seasonId: string | null) =>
+      ['dashboard', 'one', profileId, seasonId] as const,
   },
   feed: () => ['feed'] as const,
-  notifications: { all: () => ['notifications'] as const, list: () => ['notifications', 'list'] as const },
+  notifications: {
+    all: () => ['notifications'] as const,
+    /** `limit` opcional: o sino consulta 8, a página completa 20 (ambas invalidadas por `all`) */
+    list: (limit?: number) =>
+      limit === undefined
+        ? (['notifications', 'list'] as const)
+        : (['notifications', 'list', limit] as const),
+  },
   profiles: {
     all: () => ['profiles'] as const,
     active: () => ['profiles', 'active'] as const,
@@ -27,20 +35,26 @@ export const qk = {
   },
   challenges: {
     all: () => ['challenges'] as const,
-    board: (seasonId: string | null) => ['challenges', 'board', seasonId] as const,
+    /** `statuses` opcional: o board público (active+finished) e o do gestor (todos) usam caches distintos */
+    board: (seasonId: string | null, statuses?: string) =>
+      statuses === undefined
+        ? (['challenges', 'board', seasonId] as const)
+        : (['challenges', 'board', seasonId, statuses] as const),
   },
   wheel: {
     all: () => ['wheel'] as const,
     config: () => ['wheel', 'config'] as const,
     queue: () => ['wheel', 'queue'] as const,
-    history: () => ['wheel', 'history'] as const,
+    history: (limit?: number) =>
+      limit === undefined ? (['wheel', 'history'] as const) : (['wheel', 'history', limit] as const),
   },
   rewards: {
     all: () => ['rewards'] as const,
     catalog: (scope: 'store' | 'admin') => ['rewards', 'catalog', scope] as const,
     wallet: (profileId: string) => ['rewards', 'wallet', profileId] as const,
     credits: (profileId: string) => ['rewards', 'credits', profileId] as const,
-    redemptions: (scope: 'mine' | 'admin', status: string | null) => ['rewards', 'redemptions', scope, status] as const,
+    redemptions: (scope: 'mine' | 'admin', status: string | null) =>
+      ['rewards', 'redemptions', scope, status] as const,
   },
   achievements: {
     all: () => ['achievements'] as const,
@@ -49,7 +63,10 @@ export const qk = {
   ledger: {
     all: () => ['ledger'] as const,
     rules: () => ['ledger', 'rules'] as const,
-    history: (p: { profileId: string | null; page: number; pageSize: number }) => ['ledger', 'history', p] as const,
+    /** existe algum lançamento em qualquer temporada? (trava do fuso, DATA-MODEL §7.2) */
+    hasEntries: () => ['ledger', 'has-entries'] as const,
+    history: (p: { profileId: string | null; page: number; pageSize: number }) =>
+      ['ledger', 'history', p] as const,
     initialPoints: (profileId: string, seasonId: string | null) =>
       ['ledger', 'initial-points', profileId, seasonId] as const,
   },

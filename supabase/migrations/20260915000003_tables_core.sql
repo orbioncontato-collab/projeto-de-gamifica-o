@@ -94,6 +94,7 @@ create table if not exists public.season_results (
   created_at timestamptz not null default now(),
   primary key (season_id, profile_id)
 );
+create index if not exists season_results_profile_idx on public.season_results (profile_id);
 
 -- 4.7 profile_private (PII: só dono/admin)
 create table if not exists public.profile_private (

@@ -34,7 +34,15 @@ export function ListSkeleton({ rows = 5, className }: { rows?: number; className
   )
 }
 
-export function TableSkeleton({ rows = 5, cols = 4, className }: { rows?: number; cols?: number; className?: string }) {
+export function TableSkeleton({
+  rows = 5,
+  cols = 4,
+  className,
+}: {
+  rows?: number
+  cols?: number
+  className?: string
+}) {
   return (
     <div className={cn('premium-card overflow-hidden p-0', className)} aria-hidden="true">
       <div className="flex gap-3 border-b border-line px-4 py-3">
@@ -80,8 +88,8 @@ export function PageSkeleton() {
 
 export function WheelSkeleton() {
   return (
-    <div className="flex flex-col items-center gap-5" aria-hidden="true">
-      <Skeleton className="aspect-square w-[min(82vw,470px)] rounded-full" />
+    <div className="flex w-full flex-col items-center gap-5" aria-hidden="true">
+      <Skeleton className="aspect-square w-full max-w-[470px] rounded-full" />
       <Skeleton className="h-8 w-56 rounded-full" />
       <Skeleton className="h-12 w-64 rounded-xl" />
     </div>
@@ -107,8 +115,14 @@ export function AppSplash({ label = 'Carregando…' }: { label?: string }) {
 
 export function LoadingState({ label = 'Carregando…', className }: { label?: string; className?: string }) {
   return (
-    <div className={cn('flex items-center justify-center gap-3 py-10 text-sm text-muted', className)} role="status">
-      <span className="h-4 w-4 animate-spin rounded-full border-2 border-line-strong border-t-accent" aria-hidden="true" />
+    <div
+      className={cn('flex items-center justify-center gap-3 py-10 text-sm text-muted', className)}
+      role="status"
+    >
+      <span
+        className="h-4 w-4 animate-spin rounded-full border-2 border-line-strong border-t-accent"
+        aria-hidden="true"
+      />
       {label}
     </div>
   )

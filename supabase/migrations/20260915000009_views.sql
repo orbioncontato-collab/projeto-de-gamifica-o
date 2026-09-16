@@ -112,7 +112,7 @@ select
   coalesce(agg.crm_updates, 0)::int as crm_updates,
   coalesce(agg.activities_count, 0)::int as activities_count,
   coalesce(agg.missions_completed, 0)::int as missions_completed,
-  (least(round(agg.avg_conversion * 100, 2), 999.99))::numeric(5,2) as avg_conversion_pct,
+  (case when agg.avg_conversion is not null then least(round(agg.avg_conversion * 100, 2), 999.99) end)::numeric(5,2) as avg_conversion_pct,
   (case when coalesce(agg.meetings_scheduled, 0) > 0 then least(round(agg.meetings_held::numeric / agg.meetings_scheduled * 100, 2), 999.99) end)::numeric(5,2) as attendance_pct,
   (case when cnt.active_count > 0 then least(round(coalesce(agg.crm_profiles, 0)::numeric / cnt.active_count * 100, 2), 999.99) end)::numeric(5,2) as crm_pct,
   (select count(*)::int from public.wheel_queue q where q.status in ('waiting', 'active')) as queue_count,

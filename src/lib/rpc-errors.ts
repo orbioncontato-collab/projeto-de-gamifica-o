@@ -14,7 +14,12 @@ export class RpcError extends Error {
     this.name = 'RpcError'
   }
 
-  static fromPostgrest(e: { message: string; details?: string | null; code?: string | null; hint?: string | null }): RpcError {
+  static fromPostgrest(e: {
+    message: string
+    details?: string | null
+    code?: string | null
+    hint?: string | null
+  }): RpcError {
     const isCatalogCode = /^[A-Z][A-Z0-9_]{2,}$/.test(e.message) // DATA-MODEL §2.6: message = CODE
     const sqlstate = e.code ?? null
     let code = isCatalogCode ? e.message : (sqlstate ?? 'UNKNOWN')
@@ -37,7 +42,8 @@ export const RPC_MESSAGES: Record<string, string> = {
   PROFILE_NOT_FOUND: 'Perfil não encontrado.',
   INVALID_TEAM_CODE: 'Código da equipe inválido.',
   BOOTSTRAP_EMAIL_MISMATCH: 'Este e-mail não está autorizado a criar a instalação.',
-  BOOTSTRAP_REQUIRES_CONFIRMED_EMAIL: 'O primeiro gestor precisa ser criado pelo painel do Supabase (usuário já confirmado).',
+  BOOTSTRAP_REQUIRES_CONFIRMED_EMAIL:
+    'O primeiro gestor precisa ser criado pelo painel do Supabase (usuário já confirmado).',
   BOOTSTRAP_NOT_CONFIGURED: 'Instalação incompleta: aplique o schema.sql por inteiro.',
   BOOTSTRAP_LOCKED: 'O bootstrap da instalação não pode ser reaberto.',
   TEAM_CODE_VIA_RPC_ONLY: 'Use "Gerar novo código" para trocar o código da equipe.',
@@ -64,8 +70,12 @@ export const RPC_MESSAGES: Record<string, string> = {
   RULE_NOT_FOUND: 'Regra de pontuação não encontrada.',
   RULE_INACTIVE: 'Esta regra está inativa.',
   AMOUNT_REQUIRED: 'Informe o valor em R$ da venda.',
+  AMOUNT_INVALID: 'O valor em R$ deve ser no máximo 999.999.999.999.',
+  NAME_REQUIRED: 'Informe o nome (1 a 60 caracteres).',
+  GOAL_INVALID: 'A meta deve ser um valor entre 0 e 999.999.999.999.',
   QUANTITY_INVALID: 'Quantidade deve ser entre 1 e 1000.',
-  POINTS_INVALID: 'Pontos devem ser diferentes de zero e até 100.000 (com quantidade e multiplicador, até 1.000.000).',
+  POINTS_INVALID:
+    'Pontos devem ser diferentes de zero e até 100.000 (com quantidade e multiplicador, até 1.000.000).',
   INITIAL_POINTS_EXISTS: 'Pontos iniciais já lançados para este perfil nesta temporada.',
   REASON_REQUIRED: 'Informe o motivo (3 a 500 caracteres).',
   OCCURRED_AT_INVALID: 'Data do lançamento inválida (até 90 dias atrás).',
@@ -121,7 +131,12 @@ export const RPC_MESSAGES: Record<string, string> = {
 }
 
 /** Códigos cujo `detail` do servidor já vem interpolado ({n}, {key}, {DD/MM}) — preferir o detail quando existir. */
-const PREFER_DETAIL = new Set(['INSUFFICIENT_COINS', 'INVALID_PATCH_KEY', 'ATTEMPTS_INVALID', 'SEASON_NOT_STARTED'])
+const PREFER_DETAIL = new Set([
+  'INSUFFICIENT_COINS',
+  'INVALID_PATCH_KEY',
+  'ATTEMPTS_INVALID',
+  'SEASON_NOT_STARTED',
+])
 
 const FALLBACK = 'Não foi possível concluir a ação.'
 

@@ -1,0 +1,15 @@
+# Handoff — RED TEAM r2 (segurança) → agente SQL (supabase/migrations/20260915000010_rpcs.sql)
+
+Teste: `supabase/test/redteam-security-r2.test.mjs` (26 testes; 23 passam, 3 falham — todos baixa severidade, só em RPCs admin; nenhum vazamento de `team_code`, escalada, forja de ledger, giro/aprovação/resgate fora da vez ou double-spend encontrado).
+
+- `admin_update_profile({email: ' gestor@teste.local '})`: a checagem `EMAIL_TAKEN` compara `lower(pp.email) = lower(p_patch->>'email')` sem `trim`, mas o `update` grava `lower(trim(...))` — e-mail com espaços passa pela checagem e estoura o índice `profile_private_email_uq` (23505 cru). Normalizar (`lower(trim(...))`) antes de comparar.
+- `admin_update_profile`: `role`/`job_title` fora do enum → 22P02 cru; `full_name`/`team` > CK, `color` fora do regex, `avatar_path` inválido → 23514 cru. Validar no patch (ou capturar `invalid_text_representation`/`check_violation`) → código do catálogo (ex.: `PATCH_VALUE_INVALID`).
+- `update_app_settings`: `xp_per_level` texto/negativo/1e12, `rank_admins` texto, `currency`/`company_name` longos, `target_*` fora do CK → 22P02/22003/23514 crus. Mesma abordagem → `SETTINGS_VALUE_INVALID`.
+- `save_special_event`: `starts_at` não-data → 22007; `multiplier` 0 → 23514; `multiplier` 999 → 22003 (numeric overflow); `id` não-uuid → 22P02. Validar `multiplier` na faixa do CK e capturar `invalid_datetime_format`/`invalid_text_representation` → `EVENT_RANGE_INVALID`/`EVENT_VALUE_INVALID`.
+- `record_rule_entry(p_reason > 500 chars)`: 23514 cru (`point_entries_reason_check`) — cortar/validar → `REASON_INVALID`.
+- `save_mission`: `kind`/`metric`/`audience`/`reward_spin` fora do enum, `target_value` texto, `starts_at` texto, `id`/`participant_ids` não-uuid → 22P02/22007; `participant_ids` com uuid inexistente → 23503 cru; `title` null → 23502; `title`/`icon`/`description` longos, `target_value`/`reward_points` negativos, `reward_points` 1e12 → 23514/22003. Validar tipos/faixas antes do upsert → `MISSION_VALUE_INVALID`/`PARTICIPANT_NOT_FOUND`.
+- `save_challenge`: idem (`kind`, `target_value`, `ends_at`, `id`, `participant_ids` não-uuid/inexistente → 22P02/22007/23503; `reward_points` 1e12 → 22003; `reward_description` longa → 23514).
+- `save_wheel_prizes`: `sort_order` negativo na entrada colide com o espaço negativo temporário da fase 1 (`-1 - sort_order`) → 23505 cru em `wheel_prizes_sort_uq`. Validar `sort_order >= 0` (e `weight` na faixa, `value` >= 0, `label` not null/≤ CK, `color` no regex, `kind`/`id` válidos) → `PRIZES_INVALID`. Hoje também: `p_wheel_kind` fora do enum → 22P02.
+- (informativo) `save_wheel_prizes` com `id` inexistente na lista cria prêmio novo silenciosamente (aceitável, mas vale documentar em §7.6).
+- (informativo) `admin_update_profile({email: 'sem-arroba'})` grava e-mail sem `@` — spec não exige formato; se quiser, `EMAIL_INVALID` com regex simples.
+- (harness) o PGlite não materializa `alter default privileges` (pg_default_acl vazio), então o efeito de §2.2 em função nova de `public` não é verificável aqui — o teste registra diagnóstico em vez de falhar; conferir no Supabase real com `select * from pg_default_acl`.

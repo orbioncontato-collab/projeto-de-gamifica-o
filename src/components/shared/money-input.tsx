@@ -34,10 +34,20 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted" aria-hidden="true">
+      <span
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted"
+        aria-hidden="true"
+      >
         R$
       </span>
-      <Input ref={ref} inputMode="decimal" value={text} onChange={handle} className={cn('pl-9 text-right', className)} {...props} />
+      <Input
+        ref={ref}
+        inputMode="decimal"
+        value={text}
+        onChange={handle}
+        className={cn('pl-9 text-right', className)}
+        {...props}
+      />
     </div>
   )
 })

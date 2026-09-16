@@ -14,7 +14,10 @@ export function ThemeSwitch({ className, compact = false }: { className?: string
     <div
       role="group"
       aria-label="Tema"
-      className={cn('inline-flex items-center gap-0.5 rounded-xl border border-line bg-surface p-[3px]', className)}
+      className={cn(
+        'inline-flex items-center gap-0.5 rounded-xl border border-line bg-surface p-[3px]',
+        className,
+      )}
     >
       {OPTIONS.map(({ value, label, icon: Icon }) => {
         const active = theme === value

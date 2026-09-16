@@ -105,7 +105,12 @@ export const feedSentence = (row: VActivityFeed): FeedSentence => {
       return { icon: '🎯', name, text: `concluiu a missão "${str(p['title'], 'missão')}"` }
     case 'challenge_finished': {
       const challenge = str(p['name'], 'desafio')
-      return { icon: '⚔️', name, text: p['is_winner'] === true ? `venceu o desafio "${challenge}"` : `encerrou o desafio "${challenge}"` }
+      return {
+        icon: '⚔️',
+        name,
+        text:
+          p['is_winner'] === true ? `venceu o desafio "${challenge}"` : `encerrou o desafio "${challenge}"`,
+      }
     }
     case 'season_closed': {
       const season = str(p['season_name'], 'Temporada')
@@ -113,7 +118,9 @@ export const feedSentence = (row: VActivityFeed): FeedSentence => {
       return {
         icon: '📅',
         name: 'Orbion',
-        text: champion ? `Temporada ${season} encerrada — campeão: ${champion}` : `Temporada ${season} encerrada — sem campeão`,
+        text: champion
+          ? `Temporada ${season} encerrada — campeão: ${champion}`
+          : `Temporada ${season} encerrada — sem campeão`,
       }
     }
   }
@@ -162,9 +169,7 @@ export const nextRewardCopy = (dash: DashboardPayload): NextRewardCopy => {
 }
 
 export type EventState =
-  | { kind: 'none' }
-  | { kind: 'upcoming'; secondsToStart: number }
-  | { kind: 'live'; secondsToEnd: number }
+  { kind: 'none' } | { kind: 'upcoming'; secondsToStart: number } | { kind: 'live'; secondsToEnd: number }
 export const eventState = (ev: ActiveEvent | null, now: number): EventState => {
   if (!ev) return { kind: 'none' }
   const starts = new Date(ev.starts_at).getTime()

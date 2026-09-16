@@ -1,11 +1,24 @@
 import { supabase, unwrap } from '@/lib/supabase'
-import type { PendingMember, ProfilePrivateRow, ProfileRow, VAchievementBoard, VProfileStats, VRanking } from '@/lib/database.types'
+import type {
+  PendingMember,
+  ProfilePrivateRow,
+  ProfileRow,
+  VAchievementBoard,
+  VProfileStats,
+  VRanking,
+} from '@/lib/database.types'
 
 /** Read-model compartilhado de perfis (FRONTEND-ARCH §4.5 features/profiles — WP0). Só leitura. */
 
-export type ActiveProfile = Pick<ProfileRow, 'id' | 'full_name' | 'avatar_path' | 'color' | 'job_title' | 'team' | 'role'>
+export type ActiveProfile = Pick<
+  ProfileRow,
+  'id' | 'full_name' | 'avatar_path' | 'color' | 'job_title' | 'team' | 'role'
+>
 
-export async function getProfileStats(seasonId: string, opts?: { includeInactive?: boolean }): Promise<VProfileStats[]> {
+export async function getProfileStats(
+  seasonId: string,
+  opts?: { includeInactive?: boolean },
+): Promise<VProfileStats[]> {
   let q = supabase.from('v_profile_stats').select('*').eq('season_id', seasonId)
   if (!opts?.includeInactive) q = q.eq('status', 'active')
   return unwrap(q.order('rank', { nullsFirst: false }).order('full_name'))
@@ -13,7 +26,12 @@ export async function getProfileStats(seasonId: string, opts?: { includeInactive
 
 export async function getProfileStat(profileId: string, seasonId: string): Promise<VProfileStats | null> {
   return unwrap(
-    supabase.from('v_profile_stats').select('*').eq('season_id', seasonId).eq('profile_id', profileId).maybeSingle(),
+    supabase
+      .from('v_profile_stats')
+      .select('*')
+      .eq('season_id', seasonId)
+      .eq('profile_id', profileId)
+      .maybeSingle(),
   )
 }
 
@@ -60,5 +78,7 @@ export async function getProfilePrivate(profileId: string): Promise<ProfilePriva
 
 /** Promovido para cá porque Perfil (WP2) e Conquistas (WP5) consomem (regra §2.3). */
 export async function getAchievementBoard(profileId: string): Promise<VAchievementBoard[]> {
-  return unwrap(supabase.from('v_achievement_board').select('*').eq('profile_id', profileId).order('sort_order'))
+  return unwrap(
+    supabase.from('v_achievement_board').select('*').eq('profile_id', profileId).order('sort_order'),
+  )
 }

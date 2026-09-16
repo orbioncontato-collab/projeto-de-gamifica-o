@@ -18,9 +18,9 @@
   --text: #ffffff;
   --text-2: #cbd5e1;
   --muted: #94a3b8;
-  --muted-2: #64748b;
-  --muted-3: #475569;
-  --placeholder: #475569;
+  --muted-2: #8090a8; /* AA (5.1:1) sobre os cards — rótulos de StatCard/tabela */
+  --muted-3: #475569; /* só decorativo (setas, divisores), nunca texto */
+  --placeholder: #5f6f88;
   /* marca */
   --accent: #00e887;
   --accent-hover: #00ff9c;
@@ -37,12 +37,14 @@
   --bronze: #d49a72;
   --silver: #cbd5e1;
   --avatar-fg: #07111f;
+  --avatar-fallback: #f97316; /* default de `profiles.color` (DATA-MODEL §4.6) */
   /* efeitos */
   --shadow-card: 0 18px 50px rgb(0 0 0 / 0.12);
   --shadow-modal: 0 32px 100px rgb(0 0 0 / 0.55);
   --glow-accent: 0 0 30px rgb(0 232 135 / 0.22);
   --glow-gold: 0 0 40px rgb(255 200 61 / 0.18);
-  --ring: rgb(0 232 135 / 0.32);
+  --ring: #00e887; /* anel de foco sólido: 2px outline + offset (WCAG 2.4.7) */
+  --ring-offset: var(--bg);
   --radius-card: 22px;
   --radius-panel: 28px;
   --radius-ctl: 0.8rem;
@@ -80,31 +82,36 @@
   --line: #dfe7f0;
   --line-strong: #cbd5e1;
   --backdrop: rgb(15 23 42 / 0.42);
+  /* texto — todos ≥ 4.5:1 sobre #fff e sobre --bg (WCAG AA) */
   --text: #0f172a;
   --text-2: #334155;
-  --muted: #64748b;
-  --muted-2: #7c8da3;
-  --muted-3: #94a3b8;
-  --placeholder: #94a3b8;
-  --accent: #00b86b; /* verde mais escuro: contraste AA sobre branco */
-  --accent-hover: #009e5a;
+  --muted: #5b6b82;
+  --muted-2: #5f6f88;
+  --muted-3: #8391a7; /* só decorativo */
+  --placeholder: #5f6f88;
+  /* marca — versões escurecidas para AA como texto sobre branco (Apêndice A: "verde escurecido") */
+  --accent: #007f4b;
+  --accent-hover: #006e41;
   --accent-fg: #ffffff;
-  --gold: #d99a00;
-  --gold-soft: #f2c94c;
-  --blue: #2f5fe0;
-  --blue-soft: #4776ff;
-  --purple: #6d47e6;
-  --purple-soft: #855cff;
-  --red: #e03e3e;
-  --red-soft: #ff5252;
-  --cyan: #0a9bd6;
-  --bronze: #b5732e;
-  --silver: #64748b;
+  --gold: #946600;
+  --gold-soft: #b07d0a; /* só em gradientes (progress); como texto use --gold */
+  --blue: #2a55cc;
+  --blue-soft: #2f5fe0;
+  --purple: #6242d6;
+  --purple-soft: #6d47e6;
+  --red: #cf2f2f;
+  --red-soft: #cc2e2e;
+  --cyan: #0576a6;
+  --bronze: #9c5f1f;
+  --silver: #5b6b82;
+  --avatar-fg: #07111f;
+  --avatar-fallback: #f97316;
   --shadow-card: 0 14px 38px rgb(15 23 42 / 0.055);
   --shadow-modal: 0 30px 90px rgb(15 23 42 / 0.18);
   --glow-accent: 0 0 0 transparent;
   --glow-gold: 0 0 0 transparent;
-  --ring: rgb(0 184 107 / 0.3);
+  --ring: #007f4b;
+  --ring-offset: var(--bg);
   --bg-glow: radial-gradient(circle at 18% 0%, rgb(0 232 135 / 0.05), transparent 24rem);
   --tone-green-from: #eefcf6;
   --tone-green-to: #ffffff;

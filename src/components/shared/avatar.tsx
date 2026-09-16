@@ -21,7 +21,7 @@ const SIZE: Record<NonNullable<AvatarProps['size']>, string> = {
   xl: 'h-20 w-20 rounded-[20px] text-lg',
 }
 
-const FALLBACK_COLOR = '#F97316' // default de `profiles.color` (DATA-MODEL §4.6)
+const FALLBACK_COLOR = 'var(--avatar-fallback)' // default de `profiles.color` (DATA-MODEL §4.6), definido em tokens.css
 const isHex = (c: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(c)
 
 /** Foto (via `avatarUrl`) ou iniciais sobre gradiente da `color`; `alt` = nome. */
@@ -38,7 +38,11 @@ export function Avatar({ name, color, avatarPath, size = 'md', ring = false, cla
       aria-label={url ? undefined : name}
       title={name}
     >
-      {url ? <img src={url} alt={name} loading="lazy" onError={() => setBroken(true)} /> : <span aria-hidden="true">{initials(name)}</span>}
+      {url ? (
+        <img src={url} alt={name} loading="lazy" onError={() => setBroken(true)} />
+      ) : (
+        <span aria-hidden="true">{initials(name)}</span>
+      )}
     </div>
   )
 }

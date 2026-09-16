@@ -12,7 +12,8 @@
       try {
         var t = localStorage.getItem('orbion-theme')
         if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+          t =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
         }
         document.documentElement.dataset.theme = t
         var m = document.querySelector('meta[name="theme-color"]')

@@ -30,8 +30,16 @@ const partsFormatter = (tz: string): Intl.DateTimeFormat =>
 /** Componentes de "parede" de um instante no fuso. */
 export function wallParts(date: Date, tz = DEFAULT_TZ): WallParts {
   const parts = partsFormatter(tz).formatToParts(date)
-  const get = (type: Intl.DateTimeFormatPartTypes): number => Number(parts.find((p) => p.type === type)?.value ?? '0')
-  return { year: get('year'), month: get('month'), day: get('day'), hour: get('hour') % 24, minute: get('minute'), second: get('second') }
+  const get = (type: Intl.DateTimeFormatPartTypes): number =>
+    Number(parts.find((p) => p.type === type)?.value ?? '0')
+  return {
+    year: get('year'),
+    month: get('month'),
+    day: get('day'),
+    hour: get('hour') % 24,
+    minute: get('minute'),
+    second: get('second'),
+  }
 }
 
 /** Offset (ms) do fuso em relação ao UTC no instante dado: local = utc + offset. */

@@ -259,7 +259,8 @@ begin
   update public.profile_lifetime_stats
      set streak_days = coalesce(v_streak, 0),
          streak_last_day = v_last,
-         best_streak_days = greatest(best_streak_days, coalesce(v_best, 0)),
+         -- §6.2: best = max(ilhas) do ledger (não greatest com o valor antigo), para recompute_stats corrigir drift
+         best_streak_days = coalesce(v_best, 0),
          updated_at = pg_catalog.now()
    where profile_id = p_profile_id;
 end $$;
@@ -321,11 +322,14 @@ begin
 end $$;
 
 -- Delta que uma entry soma num desafio (§4.18); 0 se não se aplica.
+-- DECISIONS.md (SQL fixer r2): stable (não immutable) — para métrica 'activities' o estorno (source 'system', §7.4)
+-- precisa olhar a source da original para decrementar o que ela somou.
 create or replace function private.challenge_value(p_metric public.challenge_metric, p_entry public.point_entries)
-returns numeric language plpgsql immutable security definer set search_path = ''
+returns numeric language plpgsql stable security definer set search_path = ''
 as $$
 declare
   v_sign int;
+  v_src public.entry_source := p_entry.source;
 begin
   if p_entry.source = 'reward' then return 0; end if;
   v_sign := case when p_entry.points < 0 then -1 when p_entry.points > 0 then 1
@@ -341,7 +345,10 @@ begin
   elsif p_metric = 'revenue' then
     return case when p_entry.metric in ('sale', 'upsell') then coalesce(p_entry.amount, 0) else 0 end;
   elsif p_metric = 'activities' then
-    return case when p_entry.source in ('rule', 'manual')
+    if p_entry.reverses_entry_id is not null then
+      select o.source into v_src from public.point_entries o where o.id = p_entry.reverses_entry_id;
+    end if;
+    return case when v_src in ('rule', 'manual')
                  and (p_entry.metric is null or p_entry.metric not in ('amount_step', 'weekly_goal', 'monthly_goal', 'custom'))
                 then p_entry.quantity * v_sign else 0 end;
   end if;

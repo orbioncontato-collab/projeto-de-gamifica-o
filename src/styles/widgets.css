@@ -1,0 +1,113 @@
+/* Widgets visuais (progress, avatar) e utilitários de layout/responsivo. Importado por components.css. */
+
+/* `@layer components`: utilitários do Tailwind vencem (ver components.css). */
+@layer components {
+  /* barra de progresso (components/shared/progress.tsx) */
+  .progress-track {
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-hover);
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.7s ease;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  }
+  .progress-fill[data-tone='gold'] {
+    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+  }
+  .progress-fill[data-tone='red'] {
+    background: linear-gradient(90deg, var(--red), var(--red-soft));
+  }
+  .progress-fill[data-tone='blue'] {
+    background: linear-gradient(90deg, var(--blue), var(--blue-soft));
+  }
+  .progress-fill[data-tone='purple'] {
+    background: linear-gradient(90deg, var(--purple), var(--purple-soft));
+  }
+  .progress-fill[data-glow='true'] {
+    box-shadow: 0 0 18px color-mix(in oklab, var(--accent) 40%, transparent);
+  }
+  .progress-fill[data-glow='true'][data-tone='gold'] {
+    box-shadow: 0 0 18px color-mix(in oklab, var(--gold) 40%, transparent);
+  }
+  .progress-fill[data-glow='true'][data-tone='red'] {
+    box-shadow: 0 0 18px color-mix(in oklab, var(--red) 40%, transparent);
+  }
+  .progress-fill[data-glow='true'][data-tone='blue'] {
+    box-shadow: 0 0 18px color-mix(in oklab, var(--blue) 40%, transparent);
+  }
+
+  /* avatar com gradiente da cor da pessoa (components/shared/avatar.tsx) */
+  .avatar-tile {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--avatar-color) 35%, transparent);
+    background: linear-gradient(
+      135deg,
+      var(--avatar-color),
+      color-mix(in oklab, var(--avatar-color) 67%, transparent)
+    );
+    color: var(--avatar-fg);
+    font-weight: 900;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.15);
+  }
+  .avatar-tile[data-ring='true'] {
+    box-shadow:
+      0 0 0 3px var(--bg-elevated),
+      0 0 0 5px color-mix(in oklab, var(--avatar-color) 55%, transparent);
+  }
+  .avatar-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---- utilitários de layout/responsivo (usados por shared e disponíveis às features) ---- */
+  /* números alinhados em tabelas e contadores */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
+  /* contêiner que rola horizontalmente sozinho (tabelas largas, chips) sem estourar a página */
+  .scroll-x {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* respeita a área segura inferior (bottom nav / sheets no iPhone) */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* texto longo (e-mails, nomes) nunca força largura mínima */
+  .break-safe {
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+  /* redução de movimento: nada de deslocamento no hover nem brilho pulsante */
+  @media (prefers-reduced-motion: reduce) {
+    .primary-btn:hover,
+    .premium-card:hover {
+      transform: none;
+    }
+    .pulse-glow {
+      animation: none;
+    }
+    .confetti-layer {
+      display: none;
+    }
+  }
+  /* contraste alto do sistema: bordas mais fortes */
+  @media (prefers-contrast: more) {
+    .premium-card,
+    .field-input {
+      border-color: var(--line-strong);
+    }
+    .eyebrow[data-tone='muted'] {
+      color: var(--muted);
+    }
+  }
+}

@@ -11,12 +11,12 @@ export function installZodPtBr(): void {
   z.config(z.locales.ptBR())
 }
 
-export function useZodForm<TSchema extends z.ZodType<FieldValues>>(
-  schema: TSchema,
-  defaultValues: DefaultValues<z.input<TSchema>>,
-): UseFormReturn<z.input<TSchema>, unknown, z.output<TSchema>> {
-  return useForm<z.input<TSchema>, unknown, z.output<TSchema>>({
-    resolver: zodResolver(schema),
+export function useZodForm<Input extends FieldValues, Output extends FieldValues>(
+  schema: z.ZodType<Output, Input>,
+  defaultValues: DefaultValues<Input>,
+): UseFormReturn<Input, unknown, Output> {
+  return useForm<Input, unknown, Output>({
+    resolver: zodResolver<Input, unknown, Output>(schema),
     defaultValues,
     mode: 'onBlur',
   })
@@ -28,7 +28,9 @@ export function parseMoneyInput(value: unknown): number | null {
   if (typeof value !== 'string') return null
   const raw = value.replace(/\s|R\$/g, '').trim()
   if (!raw) return null
-  const normalized = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/\.(?=\d{3}(\D|$))/g, '')
+  const normalized = raw.includes(',')
+    ? raw.replace(/\./g, '').replace(',', '.')
+    : raw.replace(/\.(?=\d{3}(\D|$))/g, '')
   const n = Number(normalized)
   return Number.isFinite(n) ? n : null
 }
@@ -66,6 +68,9 @@ export const zText = (max: number, min = 1) =>
     .min(min, min === 1 ? 'Campo obrigatório.' : `Mínimo de ${min} caracteres.`)
     .max(max, `Máximo de ${max} caracteres.`)
 export const zTextOptional = (max: number) =>
-  z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? null : v), z.string().trim().max(max).nullable())
+  z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? null : v),
+    z.string().trim().max(max).nullable(),
+  )
 export const zInt = (min: number, max: number) =>
   z.coerce.number({ error: 'Informe um número.' }).int('Informe um número inteiro.').min(min).max(max)

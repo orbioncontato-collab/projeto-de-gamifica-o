@@ -28,9 +28,17 @@ export function PersonPicker({
   const isEmpty = profiles.isSuccess && options.length === 0
 
   return (
-    <Select value={value ?? ''} onValueChange={(v) => onChange(v || null)} disabled={disabled || profiles.isPending || isEmpty}>
+    <Select
+      value={value ?? ''}
+      onValueChange={(v) => onChange(v || null)}
+      disabled={disabled || profiles.isPending || isEmpty}
+    >
       <SelectTrigger id={id} aria-label={ariaLabel ?? 'Colaborador'}>
-        <SelectValue placeholder={profiles.isPending ? 'Carregando…' : isEmpty ? 'Nenhum colaborador ativo' : placeholder} />
+        <SelectValue
+          placeholder={
+            profiles.isPending ? 'Carregando…' : isEmpty ? 'Nenhum colaborador ativo' : placeholder
+          }
+        />
       </SelectTrigger>
       <SelectContent>
         {options.map((p) => (
@@ -39,7 +47,9 @@ export function PersonPicker({
               <Avatar name={p.full_name} color={p.color} avatarPath={p.avatar_path} size="xs" />
               <span className="flex flex-col leading-tight">
                 <span>{p.full_name}</span>
-                <span className="text-[10px] font-semibold text-muted-2">{JOB_TITLE_LABELS[p.job_title]}</span>
+                <span className="text-[10px] font-semibold text-muted-2">
+                  {JOB_TITLE_LABELS[p.job_title]}
+                </span>
               </span>
             </span>
           </SelectItem>

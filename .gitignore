@@ -6,9 +6,8 @@ coverage/
 .tanstack/**
 
 # Ambiente (nunca commitar chaves)
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
 *.local
 
 # Vercel
@@ -29,3 +28,6 @@ npm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript incremental
+*.tsbuildinfo

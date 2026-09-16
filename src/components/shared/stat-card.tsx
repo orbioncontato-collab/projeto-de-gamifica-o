@@ -28,11 +28,15 @@ export function StatCard({ label, value, icon, tone, hint, to, className }: Stat
         ) : null}
       </div>
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-2">{label}</div>
-      <div className="mt-1 truncate text-lg font-black tracking-tight text-text sm:text-xl">{value}</div>
+      <div className="nums mt-1 truncate text-lg font-black tracking-tight text-text sm:text-xl">{value}</div>
       {hint ? <div className="mt-1 text-[11px] text-muted">{hint}</div> : null}
     </>
   )
-  const classes = cn('premium-card group block p-4 transition duration-300', to && 'hover:-translate-y-1', className)
+  const classes = cn(
+    'premium-card group block p-4 transition duration-300',
+    to && 'hover:-translate-y-1 motion-reduce:hover:translate-y-0',
+    className,
+  )
   if (to) {
     return (
       <Link to={to} className={classes}>

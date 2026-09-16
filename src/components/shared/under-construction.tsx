@@ -17,7 +17,9 @@ export function UnderConstruction({ eyebrow, title, subtitle, owner }: UnderCons
       <EmptyState
         icon={Construction}
         title="Em construção"
-        description={owner ? `Esta tela será entregue pelo pacote ${owner}.` : 'Esta tela ainda não foi implementada.'}
+        description={
+          owner ? `Esta tela será entregue pelo pacote ${owner}.` : 'Esta tela ainda não foi implementada.'
+        }
       />
     </PageFrame>
   )

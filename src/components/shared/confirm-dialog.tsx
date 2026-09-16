@@ -64,7 +64,13 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isBusy}>{cancelLabel}</AlertDialogCancel>
-          <Button type="button" variant={tone === 'danger' ? 'danger' : 'primary'} loading={isBusy} onClick={() => void confirm()} autoFocus>
+          <Button
+            type="button"
+            variant={tone === 'danger' ? 'danger' : 'primary'}
+            loading={isBusy}
+            onClick={() => void confirm()}
+            autoFocus
+          >
             {confirmLabel}
           </Button>
         </AlertDialogFooter>

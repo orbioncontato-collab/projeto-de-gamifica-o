@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, type LinkProps } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
 import { Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -9,6 +9,8 @@ import type { LinkTo } from './types'
 export interface EmptyStateAction {
   label: string
   to?: LinkTo
+  /** search params obrigatórios da rota destino (ex.: `{ aba: 'temporadas' }`) — handoff WP2/5/6/7 */
+  search?: LinkProps['search']
   onClick?: () => void
 }
 
@@ -24,21 +26,35 @@ export interface EmptyStateProps {
 }
 
 /** Estado vazio bem desenhado — toda tela nasce assim com o banco recém-instalado. */
-export function EmptyState({ icon: Icon, title, description, action, compact = false, adminHint, className }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+  compact = false,
+  adminHint,
+  className,
+}: EmptyStateProps) {
   const me = useMeOptional()
   const showHint = Boolean(adminHint) && me?.isAdmin === true
   return (
     <div
+      role="status"
       className={cn(
         'flex flex-col items-center justify-center rounded-[var(--radius-card)] border border-dashed border-line-strong bg-surface text-center',
         compact ? 'gap-2 px-4 py-6' : 'gap-3 px-6 py-12',
         className,
       )}
     >
-      <div className={cn('grid place-items-center rounded-2xl bg-accent/10 text-accent', compact ? 'h-10 w-10' : 'h-14 w-14')}>
+      <div
+        className={cn(
+          'grid place-items-center rounded-2xl bg-accent/10 text-accent',
+          compact ? 'h-10 w-10' : 'h-14 w-14',
+        )}
+      >
         <Icon className={compact ? 'h-5 w-5' : 'h-7 w-7'} aria-hidden="true" />
       </div>
-      <div className={cn('font-black tracking-tight text-text', compact ? 'text-sm' : 'text-lg')}>{title}</div>
+      <p className={cn('font-black tracking-tight text-text', compact ? 'text-sm' : 'text-lg')}>{title}</p>
       <p className="max-w-md text-sm text-muted">{description}</p>
       {showHint ? (
         <p className="mt-1 inline-flex max-w-md items-start gap-2 rounded-xl border border-gold/20 bg-gold/10 px-3 py-2 text-left text-xs font-semibold text-gold">
@@ -49,7 +65,7 @@ export function EmptyState({ icon: Icon, title, description, action, compact = f
       {action ? (
         action.to ? (
           <Button asChild variant="primary" size="sm" className="mt-2">
-            <Link to={action.to} onClick={action.onClick}>
+            <Link to={action.to} search={action.search as never} onClick={action.onClick}>
               {action.label}
             </Link>
           </Button>

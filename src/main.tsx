@@ -1,5 +1,4 @@
-import '@/styles/tokens.css'
-import '@/styles/base.css'
+import '@/styles/base.css' // importa ./tokens.css (bloco @theme) junto com o Tailwind
 import '@/styles/components.css'
 import { StrictMode, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -10,7 +9,7 @@ import { isSupabaseConfigured } from '@/lib/supabase'
 import { installZodPtBr } from '@/lib/forms'
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider'
 import { ThemeProvider } from '@/features/theme/theme-provider'
-import { AppSplash } from '@/components/shared/skeletons'
+import { SplashScreen } from '@/features/auth/components/splash-screen'
 import { ConfigMissingScreen } from '@/components/shared/config-missing-screen'
 import { router } from './router'
 
@@ -37,7 +36,7 @@ function InnerApp() {
     void router.invalidate()
   }, [auth.status])
 
-  if (auth.status === 'loading') return <AppSplash /> // não monta rotas sem saber a sessão
+  if (auth.status === 'loading') return <SplashScreen /> // não monta rotas sem saber a sessão
   return <RouterProvider router={router} context={{ auth }} />
 }
 

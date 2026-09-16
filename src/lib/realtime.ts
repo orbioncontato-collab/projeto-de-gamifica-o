@@ -45,10 +45,14 @@ export function useRealtimeInvalidate(opts: {
   filter?: string
   keys: readonly (readonly unknown[])[]
   enabled?: boolean
+  /** chamado imediatamente a cada evento (sem debounce) — ex.: toast no INSERT de notificação */
+  onChange?: (payload: RealtimePostgresChangesPayload<Tables<RealtimeTable>>) => void
 }): void {
   const qc = useQueryClient()
   const keysRef = useRef(opts.keys)
   keysRef.current = opts.keys
+  const onChangeRef = useRef(opts.onChange)
+  onChangeRef.current = opts.onChange
   const { table, filter, enabled = true } = opts
 
   useEffect(() => {
@@ -57,7 +61,8 @@ export function useRealtimeInvalidate(opts: {
     const channelName = `${table}${filter ? `:${filter}` : ''}:${Math.random().toString(36).slice(2, 8)}`
     const sub: TableSubscription<RealtimeTable> = {
       table,
-      onChange: () => {
+      onChange: (payload) => {
+        onChangeRef.current?.(payload)
         if (timer) clearTimeout(timer)
         timer = setTimeout(() => {
           timer = null

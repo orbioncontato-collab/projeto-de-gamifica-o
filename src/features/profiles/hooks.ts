@@ -1,6 +1,12 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { qk } from '@/lib/query-keys'
-import type { PendingMember, ProfilePrivateRow, VAchievementBoard, VProfileStats, VRanking } from '@/lib/database.types'
+import type {
+  PendingMember,
+  ProfilePrivateRow,
+  VAchievementBoard,
+  VProfileStats,
+  VRanking,
+} from '@/lib/database.types'
 import { useMe, useMeOptional } from '@/features/auth/bootstrap-query'
 import {
   getAchievementBoard,
@@ -29,11 +35,14 @@ export function useProfileStats(
     queryKey: [...qk.profiles.stats(seasonId), includeInactive ? 'all' : 'active'] as const,
     queryFn: () => getProfileStats(seasonId as string, { includeInactive }),
     enabled: !!seasonId,
-    placeholderData: seasonId ? undefined : EMPTY,
+    ...(seasonId ? {} : { placeholderData: EMPTY }),
   })
 }
 
-export function useProfileStat(profileId: string, seasonId: string | null): UseQueryResult<VProfileStats | null> {
+export function useProfileStat(
+  profileId: string,
+  seasonId: string | null,
+): UseQueryResult<VProfileStats | null> {
   return useQuery({
     queryKey: qk.profiles.one(profileId, seasonId),
     queryFn: () => getProfileStat(profileId, seasonId as string),

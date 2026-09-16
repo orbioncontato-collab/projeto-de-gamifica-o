@@ -34,12 +34,20 @@ export default tseslint.config(
     rules: { 'no-restricted-syntax': ['error', noHexLiteral] },
   },
   {
-    files: ['src/routes/**/*.tsx'],
+    // Rotas (createFileRoute), entrada do app, providers (componente + hook no mesmo arquivo) e shadcn (cva + componente)
+    files: [
+      'src/routes/**/*.tsx',
+      'src/main.tsx',
+      'src/features/**/*-provider.tsx',
+      'src/components/ui/*.tsx',
+    ],
     rules: { 'react-refresh/only-export-components': 'off' },
   },
   {
-    files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    // Testes e helpers de teste: fixtures de cor em hex (formato do banco, DATA-MODEL §4.6) são permitidas
+    files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}', 'src/features/auth/test-utils.ts'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
+    rules: { 'no-restricted-syntax': 'off' },
   },
   prettier,
 )

@@ -25,14 +25,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 border-line bg-elevated text-text shadow-[var(--shadow-modal)] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'fixed z-50 gap-4 overscroll-contain border-line bg-elevated text-text shadow-[var(--shadow-modal)] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
-        bottom: 'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        left: 'inset-y-0 left-0 h-full w-[280px] max-w-[85vw] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
-        right: 'inset-y-0 right-0 h-full w-[280px] max-w-[85vw] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+        top: 'inset-x-0 top-0 max-h-[85dvh] overflow-y-auto border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        bottom:
+          'inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-[var(--radius-panel)] border-t safe-bottom data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+        left: 'inset-y-0 left-0 h-full w-[280px] max-w-[85vw] overflow-y-auto border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+        right:
+          'inset-y-0 right-0 h-full w-[280px] max-w-[85vw] overflow-y-auto border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
       },
     },
     defaultVariants: { side: 'left' },
@@ -52,7 +54,7 @@ const SheetContent = React.forwardRef<React.ComponentRef<typeof SheetPrimitive.C
         {children}
         {!hideClose ? (
           <SheetPrimitive.Close
-            className="absolute right-3 top-3 rounded-xl p-2 text-muted transition hover:bg-surface-hover hover:text-text focus-visible:outline-none"
+            className="absolute right-2 top-2 grid h-11 w-11 place-items-center rounded-xl text-muted transition hover:bg-surface-hover hover:text-text"
             aria-label="Fechar menu"
           >
             <X className="h-5 w-5" aria-hidden="true" />

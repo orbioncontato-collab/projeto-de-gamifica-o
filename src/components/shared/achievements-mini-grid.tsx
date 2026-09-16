@@ -52,17 +52,23 @@ export function AchievementsMiniGrid({ profileId, limit, className }: Achievemen
                             'flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-center transition',
                             a.is_unlocked
                               ? 'border-gold/25 bg-gold/10 text-gold'
-                              : 'border-line bg-surface text-muted-3 opacity-70',
+                              : 'border-line bg-surface text-muted',
                           )}
+                          role="group"
                           aria-label={`${a.title}${a.is_unlocked ? ' (desbloqueada)' : ' (bloqueada)'}`}
                           tabIndex={0}
                         >
-                          <span className="text-xl leading-none" aria-hidden="true">
+                          <span
+                            className={cn('text-xl leading-none', !a.is_unlocked && 'opacity-60')}
+                            aria-hidden="true"
+                          >
                             {a.is_unlocked ? (a.icon ?? '🏆') : <Lock className="h-4 w-4" />}
                           </span>
-                          <span className="line-clamp-2 text-[9px] font-black uppercase tracking-wide">{a.title}</span>
+                          <span className="line-clamp-2 text-[9px] font-black uppercase tracking-wide">
+                            {a.title}
+                          </span>
                           {a.is_unlocked && a.unlocked_count > 1 ? (
-                            <span className="text-[9px] font-bold text-gold-soft">×{a.unlocked_count}</span>
+                            <span className="nums text-[9px] font-bold text-gold">×{a.unlocked_count}</span>
                           ) : null}
                         </div>
                       </TooltipTrigger>

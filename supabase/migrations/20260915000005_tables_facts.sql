@@ -29,12 +29,19 @@ create table if not exists public.point_entries (
   constraint point_entries_occurred_at_ck check (occurred_at <= now() + interval '5 minutes'),
   constraint point_entries_reason_manual_ck check (source <> 'manual' or reason is not null),
   constraint point_entries_rule_needs_rule_ck check (source <> 'rule' or rule_id is not null),
-  constraint point_entries_rule_only_ck check (source in ('rule') or rule_id is null),
+  constraint point_entries_rule_only_ck check (source in ('rule') or rule_id is null or reverses_entry_id is not null),
   constraint point_entries_reward_ck check (source <> 'reward' or (coins < 0 and points = 0) or reverses_entry_id is not null),
   constraint point_entries_metric_null_ck check (source not in ('mission', 'challenge', 'wheel', 'achievement') or metric is null),
-  constraint point_entries_not_empty_ck check (source = 'rule' or points <> 0 or coins <> 0 or amount is not null),
+  constraint point_entries_not_empty_ck check (source = 'rule' or points <> 0 or coins <> 0 or amount is not null or reverses_entry_id is not null),
   constraint point_entries_multiplier_ck check (multiplier = 1 or source = 'rule')
 );
+
+-- DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce com source = 'system' (§7.4) e herda rule_id
+-- (§6.6 passo 2); um estorno de regra 0/0 também precisa passar. Reaplicação em banco existente: troca os dois CKs.
+alter table public.point_entries drop constraint if exists point_entries_rule_only_ck;
+alter table public.point_entries add constraint point_entries_rule_only_ck check (source in ('rule') or rule_id is null or reverses_entry_id is not null);
+alter table public.point_entries drop constraint if exists point_entries_not_empty_ck;
+alter table public.point_entries add constraint point_entries_not_empty_ck check (source = 'rule' or points <> 0 or coins <> 0 or amount is not null or reverses_entry_id is not null);
 create index if not exists point_entries_profile_season_idx on public.point_entries (profile_id, season_id);
 create index if not exists point_entries_profile_occurred_idx on public.point_entries (profile_id, occurred_at desc);
 create index if not exists point_entries_season_occurred_idx on public.point_entries (season_id, occurred_at);
@@ -43,6 +50,7 @@ create index if not exists point_entries_season_source_idx on public.point_entri
 create index if not exists point_entries_sales_idx on public.point_entries (occurred_at desc) where metric = 'sale';
 create index if not exists point_entries_rule_idx on public.point_entries (rule_id);
 create index if not exists point_entries_created_by_idx on public.point_entries (created_by);
+create index if not exists point_entries_special_event_idx on public.point_entries (special_event_id) where special_event_id is not null;
 
 -- 4.12 milestone_awards (idempotência de marcos)
 create table if not exists public.milestone_awards (

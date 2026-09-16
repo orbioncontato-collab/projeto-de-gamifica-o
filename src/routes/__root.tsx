@@ -19,9 +19,11 @@ function RootLayout() {
       <Outlet />
       <Toaster />
       {import.meta.env.DEV ? (
-        <Suspense fallback={null}>
-          <Devtools position="bottom-right" />
-        </Suspense>
+        <div className="fixed inset-0 z-50 hidden overflow-hidden [pointer-events:none] sm:block [&>*]:[pointer-events:auto]">
+          <Suspense fallback={null}>
+            <Devtools position="bottom-right" />
+          </Suspense>
+        </div>
       ) : null}
     </>
   )

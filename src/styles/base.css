@@ -1,35 +1,60 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* tokens.css precisa entrar por aqui: o bloco `@theme inline` só é registrado quando faz parte da mesma folha que importa o Tailwind. */
+@import './tokens.css';
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 @custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 @layer base {
   html {
     background: var(--bg);
+    /* nunca rolar horizontalmente: o conteúdo largo (tabelas, código) rola dentro do próprio contêiner */
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     margin: 0;
     min-height: 100dvh;
+    min-width: 320px;
+    overflow-x: clip;
     background: var(--bg-glow), var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-wrap: anywhere;
   }
   * {
     border-color: var(--line);
     scrollbar-width: thin;
     scrollbar-color: rgb(148 163 184 / 0.24) transparent;
   }
+  /* imagens e mídia nunca estouram a coluna (320px inclusive) */
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+  /* Foco visível (WCAG 2.4.7): anel sólido de 2px com folga, acompanha o raio do elemento
+     e não compete com `box-shadow` (glow/sombra dos cards e botões). */
   :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--ring);
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* campos de texto: anel colado à borda (sem folga) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role='combobox']:focus-visible {
+    outline-offset: 0;
   }
   ::selection {
     background: color-mix(in oklab, var(--accent) 30%, transparent);
   }
   ::placeholder {
     color: var(--placeholder);
+    opacity: 1;
   }
   button,
   [role='button'] {
@@ -39,13 +64,31 @@
   [role='button'][aria-disabled='true'] {
     cursor: not-allowed;
   }
+  /* alvo de toque ≥ 44px em telas de toque para controles pequenos (switch/checkbox) */
+  @media (pointer: coarse) {
+    button[role='switch'],
+    button[role='checkbox'] {
+      position: relative;
+    }
+    button[role='switch']::before,
+    button[role='checkbox']::before {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%, -50%);
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     /* única exceção de !important permitida: acessibilidade */
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }

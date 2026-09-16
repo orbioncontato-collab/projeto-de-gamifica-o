@@ -16,7 +16,14 @@ const SIZE: Record<NonNullable<ProgressProps['size']>, string> = { sm: 'h-1.5', 
 const clamp = (n: number): number => (Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0)
 
 /** Barra com gradiente e `aria-valuenow`. */
-export function Progress({ value, tone = 'green', size = 'md', glow = false, label, className }: ProgressProps) {
+export function Progress({
+  value,
+  tone = 'green',
+  size = 'md',
+  glow = false,
+  label,
+  className,
+}: ProgressProps) {
   const pct = clamp(value)
   return (
     <div
@@ -27,7 +34,12 @@ export function Progress({ value, tone = 'green', size = 'md', glow = false, lab
       aria-valuenow={Math.round(pct)}
       className={cn('progress-track w-full', SIZE[size], className)}
     >
-      <div className="progress-fill" data-tone={tone} data-glow={glow ? 'true' : undefined} style={{ width: `${pct}%` }} />
+      <div
+        className="progress-fill"
+        data-tone={tone}
+        data-glow={glow ? 'true' : undefined}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   )
 }

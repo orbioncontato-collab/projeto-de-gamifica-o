@@ -10,6 +10,54 @@ begin
   raise exception using message = p_code, detail = p_detail, errcode = p_errcode;
 end $$;
 
+-- DECISIONS.md: lê um valor monetário de um patch jsonb e valida a faixa de numeric(14,2) (0 .. 999.999.999.999)
+-- sem deixar vazar 22P02/22003/23514 cru. Devolve null quando a chave está ausente ou é null.
+create or replace function private.patch_goal(p_patch jsonb, p_key text)
+returns numeric language plpgsql immutable security definer set search_path = ''
+as $$
+declare
+  v_goal numeric;
+begin
+  if p_patch is null or not (p_patch ? p_key) or (p_patch ->> p_key) is null then return null; end if;
+  begin
+    v_goal := (p_patch ->> p_key)::numeric;
+  exception when invalid_text_representation or numeric_value_out_of_range then
+    v_goal := -1;
+  end;
+  if v_goal is null or v_goal < 0 or v_goal > 999999999999 then
+    raise exception using message = 'GOAL_INVALID', detail = 'A meta deve ser um valor entre 0 e 999.999.999.999.', errcode = 'P0001';
+  end if;
+  return v_goal;
+end $$;
+
+-- DECISIONS.md (SQL fixer r2): SQLSTATE cru de dado (classe 22: 22P02/22007/22003/22001) ou de integridade
+-- (classe 23: 23514/23502/23503/23505) que escape da validação explícita de uma RPC de escrita vira
+-- INVALID_ARGUMENT (P0001, detail pt-BR com o campo/constraint) — §9: "toda escrita do fluxo normal
+-- passa por RPC e devolve código do catálogo". FK de perfil inexistente → PROFILE_NOT_FOUND.
+-- Chamado só de dentro de um handler `exception when data_exception or integrity_constraint_violation`.
+create or replace function private.fail_invalid(p_sqlstate text, p_column text, p_constraint text, p_message text)
+returns void language plpgsql security definer set search_path = ''
+as $$
+declare
+  v_where text;
+begin
+  if p_sqlstate = '23503' and coalesce(p_constraint, '') ~ 'profile' then
+    raise exception using message = 'PROFILE_NOT_FOUND', detail = 'Perfil não encontrado.', errcode = 'P0001';
+  end if;
+  v_where := coalesce(nullif(p_column, ''), nullif(p_constraint, ''));
+  raise exception using
+    message = 'INVALID_ARGUMENT',
+    detail = case
+      when p_sqlstate = '23505' then 'Registro duplicado' || coalesce(' (' || v_where || ')', '') || '.'
+      when p_sqlstate = '23502' then 'Campo obrigatório' || coalesce(' (' || v_where || ')', '') || '.'
+      when p_sqlstate = '23503' then 'Referência inexistente' || coalesce(' (' || v_where || ')', '') || '.'
+      when p_sqlstate = '22003' then 'Valor fora da faixa permitida' || coalesce(' (' || v_where || ')', '') || '.'
+      when p_sqlstate = '22007' or p_sqlstate = '22008' then 'Data ou hora inválida.'
+      else 'Valor inválido' || coalesce(' (' || v_where || ')', '') || '.'
+    end,
+    errcode = 'P0001';
+end $$;
+
 create or replace function private.assert_admin()
 returns void language plpgsql security definer set search_path = ''
 as $$
@@ -241,6 +289,7 @@ declare
   v_warnings text[] := '{}';
   v_old_goal numeric;
   v_new_goal numeric;
+  v_default_goal numeric;
   v_company text;
   v_c public.challenges;
   v_result jsonb;
@@ -258,6 +307,12 @@ begin
   select * into v_profile from public.profiles p where p.id = p_profile_id for update;
   if not found then perform private.fail('PROFILE_NOT_FOUND', 'Perfil não encontrado.'); end if;
   v_old_status := v_profile.status;
+  -- DECISIONS.md: metas validadas antes de qualquer escrita (GOAL_INVALID em vez de 23514 cru)
+  v_new_goal := private.patch_goal(p_patch, 'goal_amount');
+  if p_patch ? 'goal_amount' and v_new_goal is null then
+    perform private.fail('GOAL_INVALID', 'A meta deve ser um valor entre 0 e 999.999.999.999.');
+  end if;
+  v_default_goal := private.patch_goal(p_patch, 'default_goal_amount');
 
   if p_patch ? 'status' then
     v_status_text := p_patch ->> 'status';
@@ -285,15 +340,17 @@ begin
   where p.id = p_profile_id;
 
   if p_patch ?| array['email', 'phone', 'default_goal_amount', 'notes'] then
+    -- SQL fixer r2: comparar exatamente o que o UPDATE grava (lower(trim())) — e-mail com espaços não pode
+    -- passar pela checagem e estourar profile_private_email_uq (23505 cru)
     if p_patch ? 'email' and exists (
-      select 1 from public.profile_private pp where lower(pp.email) = lower(p_patch ->> 'email') and pp.profile_id <> p_profile_id
+      select 1 from public.profile_private pp where lower(pp.email) = lower(trim(p_patch ->> 'email')) and pp.profile_id <> p_profile_id
     ) then
       perform private.fail('EMAIL_TAKEN', 'Este e-mail já está em uso.');
     end if;
     update public.profile_private pp set
       email = coalesce(lower(nullif(trim(p_patch ->> 'email'), '')), pp.email),
       phone = case when p_patch ? 'phone' then nullif(trim(p_patch ->> 'phone'), '') else pp.phone end,
-      default_goal_amount = coalesce((p_patch ->> 'default_goal_amount')::numeric, pp.default_goal_amount),
+      default_goal_amount = coalesce(v_default_goal, pp.default_goal_amount),
       notes = case when p_patch ? 'notes' then p_patch ->> 'notes' else pp.notes end,
       updated_by = (select auth.uid())
     where pp.profile_id = p_profile_id;
@@ -303,9 +360,8 @@ begin
 
   if p_patch ? 'goal_amount' then
     if v_season is null then
-      v_warnings := v_warnings || 'no_active_season_for_goal';
+      v_warnings := array_append(v_warnings, 'no_active_season_for_goal');
     else
-      v_new_goal := (p_patch ->> 'goal_amount')::numeric;
       select g.goal_amount into v_old_goal from public.season_goals g where g.season_id = v_season and g.profile_id = p_profile_id;
       insert into public.season_goals (season_id, profile_id, goal_amount, updated_by)
       values (v_season, p_profile_id, v_new_goal, (select auth.uid()))
@@ -357,6 +413,13 @@ begin
     select to_jsonb(ps) into v_result from public.v_profile_stats ps where ps.profile_id = p_profile_id and ps.season_id = v_season;
   end if;
   return jsonb_build_object('profile', v_result, 'warnings', to_jsonb(v_warnings));
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.rotate_team_code()
@@ -417,6 +480,13 @@ begin
   returning a.* into v_row;
   perform private.audit('rpc', 'update_app_settings', '1', null, p_patch);
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.save_special_event(p jsonb)
@@ -424,11 +494,15 @@ returns public.special_events language plpgsql security definer set search_path 
 as $$
 declare
   v_row public.special_events;
-  v_id uuid := (p ->> 'id')::uuid;
-  v_starts timestamptz := (p ->> 'starts_at')::timestamptz;
-  v_ends timestamptz := (p ->> 'ends_at')::timestamptz;
+  v_id uuid;
+  v_starts timestamptz;
+  v_ends timestamptz;
 begin
   perform private.assert_admin();
+  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  v_id := (p ->> 'id')::uuid;
+  v_starts := (p ->> 'starts_at')::timestamptz;
+  v_ends := (p ->> 'ends_at')::timestamptz;
   if v_starts is null or v_ends is null or v_ends <= v_starts then
     perform private.fail('EVENT_RANGE_INVALID', 'A data final deve ser posterior à inicial.');
   end if;
@@ -453,6 +527,13 @@ begin
   end;
   perform private.audit('rpc', 'save_special_event', v_row.id::text, null, p);
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.recompute_stats(p_profile_id uuid default null)
@@ -486,7 +567,7 @@ begin
       coalesce(sum(case when e.source in ('rule','manual','system') and e.metric = 'crm_update' then e.quantity * x.sgn else 0 end), 0),
       coalesce(sum(case when e.source in ('rule','manual','system') and e.metric = 'lead_recovery' then e.quantity * x.sgn else 0 end), 0),
       coalesce(sum(case when e.source in ('rule','manual','system') and e.metric = 'upsell' then e.quantity * x.sgn else 0 end), 0),
-      coalesce(sum(case when e.source in ('rule','manual') and (e.metric is null or e.metric not in ('amount_step','weekly_goal','monthly_goal','custom')) then e.quantity * x.sgn else 0 end), 0),
+      coalesce(sum(case when coalesce(o.source, e.source) in ('rule','manual') and (e.metric is null or e.metric not in ('amount_step','weekly_goal','monthly_goal','custom')) then e.quantity * x.sgn else 0 end), 0),
       (select count(*)::int from public.mission_progress mp join public.missions m on m.id = mp.mission_id
         where mp.profile_id = e.profile_id and m.season_id = e.season_id and mp.completed_at is not null),
       max(e.occurred_at) filter (where private.counts_for_streak(e))
@@ -545,13 +626,20 @@ declare
   v_xp int;
 begin
   perform private.assert_admin();
+  -- DECISIONS.md: validar antes do insert para nunca vazar 23502/23514 cru (§9: RPC devolve código do catálogo)
+  if p_name is null or length(trim(p_name)) < 1 or length(trim(p_name)) > 60 then
+    perform private.fail('NAME_REQUIRED', 'Informe o nome (1 a 60 caracteres).');
+  end if;
+  if p_team_goal_amount is not null and (p_team_goal_amount < 0 or p_team_goal_amount > 999999999999) then
+    perform private.fail('GOAL_INVALID', 'A meta deve ser um valor entre 0 e 999.999.999.999.');
+  end if;
   if p_starts_on is null or p_ends_on is null or p_ends_on < p_starts_on then
     perform private.fail('SEASON_RANGE_INVALID', 'A data final deve ser posterior à inicial.');
   end if;
   select a.xp_per_level into v_xp from public.app_settings a where a.id = 1;
   begin
     insert into public.seasons (name, starts_at, ends_at, team_goal_amount, xp_per_level, is_active)
-    values (p_name, (p_starts_on::timestamp) at time zone v_tz, ((p_ends_on + 1)::timestamp) at time zone v_tz, coalesce(p_team_goal_amount, 0), coalesce(v_xp, 400), false)
+    values (trim(p_name), (p_starts_on::timestamp) at time zone v_tz, ((p_ends_on + 1)::timestamp) at time zone v_tz, coalesce(p_team_goal_amount, 0), coalesce(v_xp, 400), false)
     returning * into v_row;
   exception when exclusion_violation then
     raise exception using message = 'SEASON_OVERLAP', detail = 'O período conflita com outra temporada.', errcode = 'P0001';
@@ -567,6 +655,13 @@ begin
     v_row := public.activate_season(v_row.id);
   end if;
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.update_season(p_season_id uuid, p_patch jsonb)
@@ -578,6 +673,7 @@ declare
   v_row public.seasons;
   v_starts timestamptz;
   v_ends timestamptz;
+  v_goal numeric;
 begin
   perform private.assert_admin();
   if p_patch is null or jsonb_typeof(p_patch) <> 'object' then
@@ -591,13 +687,24 @@ begin
   select * into v_row from public.seasons s where s.id = p_season_id for update;
   if not found then perform private.fail('SEASON_NOT_FOUND', 'Temporada não encontrada.'); end if;
 
+  -- DECISIONS.md: valores do patch são validados/convertidos aqui para nunca vazar 22007/22P02/23514 cru (§9)
+  if p_patch ? 'name' and (p_patch ->> 'name') is not null
+     and (length(trim(p_patch ->> 'name')) < 1 or length(trim(p_patch ->> 'name')) > 60) then
+    perform private.fail('NAME_REQUIRED', 'Informe o nome (1 a 60 caracteres).');
+  end if;
+  v_goal := private.patch_goal(p_patch, 'team_goal_amount');
+
   v_starts := v_row.starts_at;
   v_ends := v_row.ends_at;
   if p_patch ?| array['starts_on', 'ends_on'] then
     if v_row.closed_at is not null then perform private.fail('SEASON_ALREADY_CLOSED', 'Temporada já encerrada.'); end if;
-    if p_patch ? 'starts_on' then v_starts := ((p_patch ->> 'starts_on')::date::timestamp) at time zone v_tz; end if;
-    if p_patch ? 'ends_on' then v_ends := (((p_patch ->> 'ends_on')::date + 1)::timestamp) at time zone v_tz; end if;
-    if v_ends <= v_starts then perform private.fail('SEASON_RANGE_INVALID', 'A data final deve ser posterior à inicial.'); end if;
+    begin
+      if p_patch ? 'starts_on' then v_starts := ((p_patch ->> 'starts_on')::date::timestamp) at time zone v_tz; end if;
+      if p_patch ? 'ends_on' then v_ends := (((p_patch ->> 'ends_on')::date + 1)::timestamp) at time zone v_tz; end if;
+    exception when invalid_datetime_format or datetime_field_overflow or invalid_text_representation then
+      v_starts := null;
+    end;
+    if v_starts is null or v_ends is null or v_ends <= v_starts then perform private.fail('SEASON_RANGE_INVALID', 'A data final deve ser posterior à inicial.'); end if;
     if exists (select 1 from public.point_entries e where e.season_id = p_season_id and (e.occurred_at < v_starts or e.occurred_at >= v_ends)) then
       perform private.fail('SEASON_HAS_ENTRIES_OUTSIDE', 'Existem lançamentos fora do novo período.');
     end if;
@@ -610,7 +717,7 @@ begin
   begin
     update public.seasons s set
       name = coalesce(nullif(trim(p_patch ->> 'name'), ''), s.name),
-      team_goal_amount = coalesce((p_patch ->> 'team_goal_amount')::numeric, s.team_goal_amount),
+      team_goal_amount = coalesce(v_goal, s.team_goal_amount),
       starts_at = v_starts,
       ends_at = v_ends
     where s.id = p_season_id
@@ -620,6 +727,13 @@ begin
   end;
   perform private.audit('rpc', 'update_season', p_season_id::text, null, p_patch);
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.activate_season(p_season_id uuid)
@@ -755,7 +869,7 @@ begin
   -- 9. aviso de buraco até a próxima temporada
   select s.* into v_next from public.seasons s where s.starts_at > v_ends_at order by s.starts_at limit 1;
   if found and not exists (select 1 from public.seasons s where s.id <> p_season_id and s.starts_at <= v_ends_at and s.ends_at > v_ends_at) then
-    v_warnings := v_warnings || 'gap_until_next_season';
+    v_warnings := array_append(v_warnings, 'gap_until_next_season');
   end if;
 
   select coalesce(jsonb_agg(jsonb_build_object('profile_id', r.profile_id, 'final_rank', r.final_rank, 'final_points', r.final_points,
@@ -794,6 +908,11 @@ begin
   select * into v_rule from public.point_rules r where r.id = p_rule_id and r.deleted_at is null;
   if not found then perform private.fail('RULE_NOT_FOUND', 'Regra de pontuação não encontrada.'); end if;
   if v_qty < 1 or v_qty > 1000 then perform private.fail('QUANTITY_INVALID', 'Quantidade deve ser entre 1 e 1000.'); end if;
+  -- DECISIONS.md: numeric(14,2) aceita até 999.999.999.999,99; validar o teto aqui evita 22003 cru (§9).
+  -- Só o teto: null/negativo continuam como AMOUNT_REQUIRED em before_point_entry (§6.6).
+  if p_amount is not null and p_amount > 999999999999 then
+    perform private.fail('AMOUNT_INVALID', 'O valor em R$ deve ser no máximo 999.999.999.999.');
+  end if;
   if v_rule.points * v_qty * 10 > 1000000 then
     perform private.fail('POINTS_INVALID', 'Pontos devem ser diferentes de zero e até 100.000 (com quantidade e multiplicador, até 1.000.000).');
   end if;
@@ -818,6 +937,13 @@ begin
     values (p_profile_id, v_entry.season_id, 'weekly_goal', v_key, v_entry.id);
   end if;
   return v_entry;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.record_manual_entry(p_profile_id uuid, p_points int, p_reason text, p_coins int default null)
@@ -839,13 +965,20 @@ begin
     perform private.fail('REASON_REQUIRED', 'Informe o motivo (3 a 500 caracteres).');
   end if;
   v_coins := coalesce(p_coins, case when p_points > 0 then p_points else 0 end);
-  if abs(v_coins) > 100000 then
+  if v_coins < -100000 or v_coins > 100000 then
     perform private.fail('POINTS_INVALID', 'Pontos devem ser diferentes de zero e até 100.000 (com quantidade e multiplicador, até 1.000.000).');
   end if;
   insert into public.point_entries (profile_id, source, base_points, points, coins, reason, occurred_at)
   values (p_profile_id, 'manual', p_points, p_points, v_coins, trim(p_reason), pg_catalog.now())
   returning * into v_entry;
   return v_entry;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.record_initial_points(p_profile_id uuid, p_points int)
@@ -873,6 +1006,13 @@ begin
   values (p_profile_id, 'system', p_points, p_points, 0, 'Pontos iniciais', pg_catalog.now())
   returning * into v_entry;
   return v_entry;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.reverse_entry(p_entry_id uuid, p_reason text)
@@ -892,9 +1032,11 @@ begin
   if v_orig.source = 'reward' or (v_orig.source = 'wheel' and exists (select 1 from public.wheel_spins s where s.entry_id = v_orig.id and s.redemption_id is not null)) then
     perform private.fail('USE_HANDLE_REDEMPTION', 'Cancele o resgate pela tela de recompensas.');
   end if;
-  -- occurred_at/season_id/sinais/rule_id/source herdados pelo trigger before_point_entry (§6.6 passo 2)
+  -- occurred_at/season_id/sinais/rule_id herdados pelo trigger before_point_entry (§6.6 passo 2);
+  -- source = 'system' para rule/manual/system (§7.4), senão herda (o trigger reforça a mesma regra)
   insert into public.point_entries (profile_id, source, reverses_entry_id, reason, base_points, points, coins)
-  values (v_orig.profile_id, v_orig.source, p_entry_id, coalesce(nullif(trim(p_reason), ''), 'Estorno'), 0, 0, 0)
+  values (v_orig.profile_id, case when v_orig.source in ('rule', 'manual', 'system') then 'system'::public.entry_source else v_orig.source end,
+          p_entry_id, coalesce(nullif(trim(p_reason), ''), 'Estorno'), 0, 0, 0)
   returning * into v_entry;
   perform private.audit('rpc', 'reverse_entry', p_entry_id::text, to_jsonb(v_orig), jsonb_build_object('reversal_id', v_entry.id, 'reason', p_reason));
   return v_entry;
@@ -907,15 +1049,19 @@ create or replace function public.save_mission(p jsonb)
 returns public.missions language plpgsql security definer set search_path = ''
 as $$
 declare
-  v_id uuid := (p ->> 'id')::uuid;
+  v_id uuid;
   v_row public.missions;
   v_old public.missions;
-  v_spin public.wheel_kind := (p ->> 'reward_spin')::public.wheel_kind;
-  v_audience public.mission_audience := coalesce((p ->> 'audience')::public.mission_audience, 'all');
+  v_spin public.wheel_kind;
+  v_audience public.mission_audience;
   v_ids uuid[];
   v_pid uuid;
 begin
   perform private.assert_admin();
+  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  v_id := (p ->> 'id')::uuid;
+  v_spin := (p ->> 'reward_spin')::public.wheel_kind;
+  v_audience := coalesce((p ->> 'audience')::public.mission_audience, 'all');
   if v_spin is not null and not exists (select 1 from public.wheels w where w.kind = v_spin and w.is_active) then
     perform private.fail('WHEEL_INACTIVE', 'Esta roleta está desativada.');
   end if;
@@ -976,6 +1122,13 @@ begin
   end if;
   perform private.audit('rpc', 'save_mission', v_row.id::text, null, p);
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.delete_mission(p_mission_id uuid)
@@ -992,15 +1145,19 @@ create or replace function public.save_challenge(p jsonb)
 returns public.challenges language plpgsql security definer set search_path = ''
 as $$
 declare
-  v_id uuid := (p ->> 'id')::uuid;
+  v_id uuid;
   v_row public.challenges;
   v_old public.challenges;
-  v_kind public.challenge_kind := (p ->> 'kind')::public.challenge_kind;
-  v_spin public.wheel_kind := (p ->> 'reward_spin')::public.wheel_kind;
+  v_kind public.challenge_kind;
+  v_spin public.wheel_kind;
   v_ids uuid[];
   v_pid uuid;
 begin
   perform private.assert_admin();
+  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  v_id := (p ->> 'id')::uuid;
+  v_kind := (p ->> 'kind')::public.challenge_kind;
+  v_spin := (p ->> 'reward_spin')::public.wheel_kind;
   if v_spin is not null and not exists (select 1 from public.wheels w where w.kind = v_spin and w.is_active) then
     perform private.fail('WHEEL_INACTIVE', 'Esta roleta está desativada.');
   end if;
@@ -1054,6 +1211,13 @@ begin
   end loop;
   perform private.audit('rpc', 'save_challenge', v_row.id::text, null, p);
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.activate_challenge(p_challenge_id uuid)
@@ -1250,6 +1414,13 @@ begin
   values (p_profile_id, v_name, v_wheel.id, p_attempts, 'waiting', 'manual', (select auth.uid()))
   returning * into v_row;
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.update_queue_entry(p_queue_id uuid, p_wheel_kind public.wheel_kind default null, p_attempts int default null)
@@ -1279,6 +1450,13 @@ begin
   where q.id = p_queue_id
   returning q.* into v_row;
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 create or replace function public.remove_from_queue(p_queue_id uuid)
@@ -1320,6 +1498,8 @@ begin
   if exists (select 1 from public.wheel_spins s where s.status = 'pending') then
     perform private.fail('SPIN_PENDING', 'Há um prêmio aguardando aprovação.');
   end if;
+  -- §7.6 passo 5: QUEUE_NOT_WAITING antes de ATTEMPTS_EXHAUSTED (linha já travada com for update)
+  if v_row.status <> 'waiting' then perform private.fail('QUEUE_NOT_WAITING', 'Só entradas em espera podem ser liberadas.'); end if;
   if v_row.attempts_used >= v_row.attempts_allowed then perform private.fail('ATTEMPTS_EXHAUSTED', 'Tentativas esgotadas.'); end if;
   update public.wheel_queue q set status = 'waiting', released_at = null where q.status = 'active' and q.id <> p_queue_id;
   update public.wheel_queue q set status = 'active', released_at = pg_catalog.now()
@@ -1543,6 +1723,15 @@ begin
   if p_prizes is null or jsonb_typeof(p_prizes) <> 'array' then
     perform private.fail('SORT_ORDER_DUPLICATE', 'Há prêmios com a mesma posição.');
   end if;
+  -- SQL fixer r2: cada item precisa ser objeto com sort_order inteiro >= 0 — a fase 1 usa o espaço negativo
+  -- (-1 - sort_order) como área temporária, e um sort_order negativo na entrada colidiria com ele (23505 cru).
+  if exists (
+    select 1 from jsonb_array_elements(p_prizes) x
+    where jsonb_typeof(x) <> 'object' or jsonb_typeof(x -> 'sort_order') <> 'number' or (x ->> 'sort_order')::numeric < 0
+       or (x ->> 'sort_order')::numeric <> floor((x ->> 'sort_order')::numeric)
+  ) then
+    perform private.fail('INVALID_ARGUMENT', 'Valor inválido (sort_order): informe a posição de cada prêmio como inteiro a partir de 0.');
+  end if;
   if (select count(*) from jsonb_array_elements(p_prizes) x) <> (select count(distinct (x ->> 'sort_order')::int) from jsonb_array_elements(p_prizes) x) then
     perform private.fail('SORT_ORDER_DUPLICATE', 'Há prêmios com a mesma posição.');
   end if;
@@ -1580,6 +1769,13 @@ begin
 
   perform private.audit('rpc', 'save_wheel_prizes', v_wheel.id::text, null, p_prizes);
   return query select p.* from public.wheel_prizes p where p.wheel_id = v_wheel.id and p.deleted_at is null and p.is_active order by p.sort_order, p.id;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 -- =============================================================================
@@ -1655,6 +1851,13 @@ begin
     v_row.title || coalesce(' — ' || nullif(trim(p_notes), ''), ''), jsonb_build_object('redemption_id', p_redemption_id, 'status', v_new));
   perform private.audit('rpc', 'handle_redemption', p_redemption_id::text, null, jsonb_build_object('action', p_action, 'notes', p_notes, 'status', v_new));
   return v_row;
+exception when data_exception or integrity_constraint_violation then
+  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  declare v_diag_col text; v_diag_con text; v_diag_msg text;
+  begin
+    get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
+    perform private.fail_invalid(sqlstate, v_diag_col, v_diag_con, v_diag_msg);
+  end;
 end $$;
 
 -- =============================================================================
