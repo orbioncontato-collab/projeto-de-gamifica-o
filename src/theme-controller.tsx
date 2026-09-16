@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 import "./theme.css";
+import "./theme-light-accent.css";
 
 type ThemeMode = "dark" | "light";
 
