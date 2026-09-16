@@ -19,7 +19,7 @@
 7. Definition of Done por pacote
 8. Vercel, `vercel.json`, variáveis de ambiente, `.env.example`
 9. Estados vazios (banco sem dados)
-Apêndice A — identidade visual a preservar (paleta e padrões do Lovable)
+Apêndice A — identidade visual a preservar (paleta e padrões do protótipo original)
 Apêndice B — checklist de integração final
 
 ---
@@ -140,7 +140,7 @@ Gerenciador de pacotes: **npm** (apagar `bun.lock` e `bunfig.toml`; commitar `pa
 | deps `@radix-ui/react-accordion, -aspect-ratio, -avatar, -collapsible, -context-menu, -hover-card, -menubar, -navigation-menu, -popover, -progress, -radio-group, -scroll-area, -slider, -toggle, -toggle-group`, `cmdk`, `vaul`, `embla-carousel-react`, `input-otp`, `react-day-picker`, `react-resizable-panels` | componentes shadcn não usados (§1.4). Datas usam `<input type="date">`/`datetime-local` nativos |
 | `src/start.ts`, `src/server.ts`, `src/router.tsx` (reescrito), `src/routes/index.tsx`, `src/routes/README.md`, `src/routeTree.gen.ts` (regenerado), `src/lib/error-capture.ts`, `src/lib/error-page.ts`, `src/lib/lovable-error-reporting.ts`, `src/styles.css` (substituído por `src/styles/*`) | Start/Lovable |
 | `src/gamification-app.tsx`, `src/gamification.css`, `src/wheel-*.tsx/.css`, `src/manager-*.tsx/.css`, `src/admin-*.tsx/.css`, `src/theme-controller.tsx`, `src/theme.css`, `src/hooks/use-mobile.tsx` | overlays com dados fictícios e `!important`. **Antes de apagar**, o WP0 copia para `docs/spec/legacy/` os trechos de CSS reaproveitados (roda, confete, pódio) — ver Apêndice A |
-| `.lovable/`, `AGENTS.md`, `bun.lock`, `bunfig.toml`, `components.json` (recriado), `README.md` (reescrito) | vestígios Lovable/Bun |
+| `.lovable/`, `AGENTS.md`, `bun.lock`, `bunfig.toml`, `components.json` (recriado), `README.md` (reescrito) | vestígios do protótipo/Bun |
 | `eslint.config.js` regra `no-restricted-imports: server-only` e ignores `.output/.vinxi` | Start |
 
 ### 1.4 shadcn/ui — componentes mantidos (11) e apagados (39)
@@ -330,7 +330,7 @@ src/
         spin-button.tsx · spin-result-dialog.tsx · confetti.tsx
         queue-quick-panel.tsx · queue-panel.tsx · queue-add-form.tsx · queue-list.tsx · queue-row.tsx · wheel-history.tsx
         prize-editor.tsx (usado por /admin/roleta)
-      wheel.css                 # roda, ponteiro, centro, rótulos por setor, confete (portado do Lovable, sem !important)
+      wheel.css                 # roda, ponteiro, centro, rótulos por setor, confete (portado do protótipo, sem !important)
     rewards/
       api.ts · hooks.ts · schemas.ts
       components/rewards-page.tsx · wallet-card.tsx · reward-card.tsx · store-grid.tsx · my-redemptions.tsx
@@ -1442,7 +1442,7 @@ Contexto: o seed cria só catálogo (temporada do mês com meta 0, 10 regras —
 
 ---
 
-## Apêndice A — identidade visual a preservar (extraída do Lovable)
+## Apêndice A — identidade visual a preservar (extraída do protótipo original)
 
 - Fundo `#07111F` com brilho radial verde no topo-esquerdo; sidebar `rgba(9,21,34,.95)` com blur; topbar `#07111F/80` com blur; cards `linear-gradient(145deg, rgba(17,31,48,.96), rgba(13,27,42,.96))`, borda `rgba(255,255,255,.075)`, raio 22 px, sombra `0 18px 50px rgba(0,0,0,.12)`; modais `#0D1B2A` raio 24–28 px, backdrop `#020710/80` + blur.
 - Acento verde `#00E887` (hover `#00FF9C`, texto sobre verde `#07111F`), dourado `#FFC83D`, azul `#4776FF` (soft `#7396FF`), roxo `#855CFF` (soft `#B49BFF`), vermelho `#FF5252` (soft `#FF7272`), ciano `#27C2FF`, bronze do pódio `#D49A72`, cinzas `#CBD5E1/#94A3B8/#64748B/#475569/#334155`.
