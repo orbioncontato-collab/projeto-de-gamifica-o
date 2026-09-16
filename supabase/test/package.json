@@ -1,0 +1,14 @@
+{
+  "name": "orbion-sales-league-db-tests",
+  "private": true,
+  "type": "module",
+  "description": "Testes do schema Supabase (PGlite em memória, sem Docker nem CLI).",
+  "scripts": {
+    "test": "node --test ./*.test.mjs",
+    "test:watch": "node --test --watch ./*.test.mjs",
+    "build:schema": "node ../build-schema.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8"
+  }
+}

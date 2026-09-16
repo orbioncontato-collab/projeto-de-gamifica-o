@@ -1,16 +1,28 @@
-import { QueryClient } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+import { queryClient } from '@/lib/query-client'
+import type { AuthState } from '@/features/auth/auth-provider'
+import { PageSkeleton } from '@/components/shared/skeletons'
+import { RouteErrorState } from '@/components/shared/route-error-state'
 
-export const getRouter = () => {
-  const queryClient = new QueryClient();
+export interface RouterContext {
+  queryClient: typeof queryClient
+  auth: AuthState
+}
 
-  const router = createRouter({
-    routeTree,
-    context: { queryClient },
-    scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
-  });
+export const router = createRouter({
+  routeTree,
+  context: { queryClient, auth: undefined! }, // auth é injetado pelo RouterProvider em main.tsx
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0, // React Query é o cache
+  scrollRestoration: true,
+  defaultPendingComponent: PageSkeleton,
+  defaultPendingMs: 200,
+  defaultErrorComponent: RouteErrorState,
+})
 
-  return router;
-};
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
