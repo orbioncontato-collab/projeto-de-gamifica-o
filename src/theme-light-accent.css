@@ -1,0 +1,113 @@
+/* Higher contrast green palette for the light theme only. */
+html[data-orbion-theme="light"] {
+  --orbion-light-green: #047857;
+  --orbion-light-green-strong: #065f46;
+  --orbion-light-green-soft: #ecfdf5;
+  --orbion-light-green-border: rgba(4, 120, 87, .24);
+}
+
+/* Utility colors generated in the original UI. */
+html[data-orbion-theme="light"] [class*="text-[#00E887]"],
+html[data-orbion-theme="light"] [class*="text-[#00e887]"],
+html[data-orbion-theme="light"] [class*="text-[#00FF9C]"],
+html[data-orbion-theme="light"] [class*="text-[#00ff9c]"] {
+  color: var(--orbion-light-green) !important;
+}
+
+html[data-orbion-theme="light"] [class*="border-[#00E887]"],
+html[data-orbion-theme="light"] [class*="border-[#00e887]"] {
+  border-color: var(--orbion-light-green-border) !important;
+}
+
+html[data-orbion-theme="light"] [class*="bg-[#00E887]"],
+html[data-orbion-theme="light"] [class*="bg-[#00e887]"],
+html[data-orbion-theme="light"] [class*="bg-[#00FF9C]"],
+html[data-orbion-theme="light"] [class*="bg-[#00ff9c]"] {
+  background-color: var(--orbion-light-green) !important;
+  color: #fff !important;
+}
+
+/* Main green labels, actions and indicators used by custom modules. */
+html[data-orbion-theme="light"] .manager-heading>div:first-child>span,
+html[data-orbion-theme="light"] .manager-pill,
+html[data-orbion-theme="light"] .open-person,
+html[data-orbion-theme="light"] .collaborator-person span,
+html[data-orbion-theme="light"] .mini-missions svg,
+html[data-orbion-theme="light"] .mini-missions b,
+html[data-orbion-theme="light"] .admin-kicker,
+html[data-orbion-theme="light"] .config-head-copy>span,
+html[data-orbion-theme="light"] .config-dot.active,
+html[data-orbion-theme="light"] .admin-roster-kicker,
+html[data-orbion-theme="light"] .admin-roster-status.active,
+html[data-orbion-theme="light"] .positive,
+html[data-orbion-theme="light"] .wheel-quick-head span,
+html[data-orbion-theme="light"] .wheel-quick-status.live,
+html[data-orbion-theme="light"] .wheel-quick-source button.active,
+html[data-orbion-theme="light"] .wheel-quick-attempts button.unlocked,
+html[data-orbion-theme="light"] .wheel-quick-line article button,
+html[data-orbion-theme="light"] .wheel-status-dot.is-winner,
+html[data-orbion-theme="light"] .admin-toast svg,
+html[data-orbion-theme="light"] .admin-roster-toast svg,
+html[data-orbion-theme="light"] .admin-config-toast svg,
+html[data-orbion-theme="light"] .wheel-quick-toast svg,
+html[data-orbion-theme="light"] .wheel-queue-toast svg {
+  color: var(--orbion-light-green) !important;
+}
+
+html[data-orbion-theme="light"] .manager-pill,
+html[data-orbion-theme="light"] .admin-roster-head>span,
+html[data-orbion-theme="light"] .admin-roster-status.active,
+html[data-orbion-theme="light"] .wheel-quick-status.live,
+html[data-orbion-theme="light"] .wheel-quick-source button.active,
+html[data-orbion-theme="light"] .wheel-quick-attempts button.unlocked {
+  border-color: var(--orbion-light-green-border) !important;
+  background: var(--orbion-light-green-soft) !important;
+}
+
+/* Solid green actions use white text in light mode for stronger readability. */
+html[data-orbion-theme="light"] .primary-btn,
+html[data-orbion-theme="light"] .admin-bar-actions button.primary,
+html[data-orbion-theme="light"] .modal-footer button.save,
+html[data-orbion-theme="light"] .admin-roster-footer button.save,
+html[data-orbion-theme="light"] .config-footer button.save,
+html[data-orbion-theme="light"] .config-head-action button.save-main,
+html[data-orbion-theme="light"] .wheel-quick-add,
+html[data-orbion-theme="light"] .wheel-quick-line article.active button {
+  background: var(--orbion-light-green) !important;
+  color: #fff !important;
+  border-color: var(--orbion-light-green) !important;
+}
+
+html[data-orbion-theme="light"] .primary-btn:hover,
+html[data-orbion-theme="light"] .admin-bar-actions button.primary:hover,
+html[data-orbion-theme="light"] .modal-footer button.save:hover,
+html[data-orbion-theme="light"] .admin-roster-footer button.save:hover,
+html[data-orbion-theme="light"] .wheel-quick-add:hover {
+  background: var(--orbion-light-green-strong) !important;
+}
+
+/* Progress and status elements should remain green, but use the darker accent. */
+html[data-orbion-theme="light"] .health-track i,
+html[data-orbion-theme="light"] .level-track i,
+html[data-orbion-theme="light"] .sales-progress i {
+  background: var(--orbion-light-green) !important;
+  box-shadow: 0 0 12px rgba(4, 120, 87, .16) !important;
+}
+
+html[data-orbion-theme="light"] .manager-avatar,
+html[data-orbion-theme="light"] .admin-roster-avatar {
+  background: linear-gradient(145deg, #10b981, var(--orbion-light-green)) !important;
+  color: #fff !important;
+}
+
+html[data-orbion-theme="light"] .orbion-theme-switch button.active {
+  background: var(--orbion-light-green-soft) !important;
+  color: var(--orbion-light-green) !important;
+  box-shadow: inset 0 0 0 1px var(--orbion-light-green-border) !important;
+}
+
+/* Keep the wheel sectors vivid. Only interface accents are darkened. */
+html[data-orbion-theme="light"] .wheel-prize-label,
+html[data-orbion-theme="light"] .wheel-prize-spoke.is-selected .wheel-prize-label {
+  color: #fff !important;
+}
