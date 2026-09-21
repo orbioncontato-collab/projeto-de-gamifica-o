@@ -17,12 +17,12 @@ painel do gestor. Interface em português do Brasil.
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env.local` (ignorado pelo git) e preencha:
+Copie `.env.example` para `.env` (ignorado pelo git) e preencha:
 
-| Variável                        | Onde encontrar                                                                 |
-| ------------------------------- | ------------------------------------------------------------------------------ |
-| `VITE_SUPABASE_URL`             | Supabase → Project Settings → API → Project URL                                |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API → chave **publishable** (`sb_publishable_…`) |
+| Variável                        | Onde encontrar                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | Supabase → Project Settings → API Keys → Project URL                              |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API Keys → **Publishable key** (`sb_publishable_…`) |
 
 Use sempre a chave _publishable_; nunca a _secret_/`service_role`. Só variáveis com prefixo `VITE_`
 chegam ao navegador. Sem essas duas variáveis o app não fica em branco: ele mostra a tela
@@ -67,11 +67,11 @@ docs/spec/       # especificações e handoffs entre pacotes de trabalho
 1. **Banco primeiro.** Crie o projeto no Supabase (região São Paulo), cole `supabase/schema.sql`
    inteiro no SQL Editor e rode (`supabase/README.md`). Confira o fuso em `app_settings`
    (padrão `America/Sao_Paulo`) — ele trava depois do primeiro lançamento.
-2. **Primeiro gestor, ANTES de publicar.** Supabase → Authentication → Users → *Add user* →
-   *Create new user* com **Auto confirm** marcado. O primeiro usuário do banco vira gestor; se a
+2. **Primeiro gestor, ANTES de publicar.** Supabase → Authentication → Users → _Add user_ →
+   _Create new user_ com **Auto confirm** marcado. O primeiro usuário do banco vira gestor; se a
    URL for publicada antes disso, o primeiro visitante que se cadastrar vira gestor
    (recuperação em `docs/spec/DATA-MODEL.md` §16.4).
-3. **Auth.** Authentication → Sign In / Providers → Email: desligue *Confirm email* (o e-mail
+3. **Auth.** Authentication → Sign In / Providers → Email: desligue _Confirm email_ (o e-mail
    nativo do Supabase só entrega para membros da organização). Para "esqueci a senha" funcionar
    para o time, configure SMTP próprio em Authentication → Emails → SMTP Settings (§16.2).
 4. **Vercel.** Importe o repositório; `vercel.json` já define framework Vite, `npm run build`,

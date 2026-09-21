@@ -1,11 +1,14 @@
 import '@testing-library/jest-dom/vitest'
 import { afterEach, vi } from 'vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 
 /**
  * Setup global do vitest (FRONTEND-ARCH §2.1 `test/setup.ts`): jest-dom, mock de matchMedia
  * (ThemeProvider lê `prefers-color-scheme`) e env falso do Supabase (nenhum teste faz rede).
  */
+
+// findBy*/waitFor: 1 s padrão é curto quando 52 arquivos rodam em paralelo (ver vitest.config.ts)
+configure({ asyncUtilTimeout: 10_000 })
 
 vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co')
 vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test')
