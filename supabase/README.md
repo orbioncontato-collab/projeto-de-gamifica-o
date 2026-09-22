@@ -6,7 +6,7 @@ WASM, em memória) — **sem Docker, sem Supabase CLI e sem psql**.
 
 ```
 supabase/
-├── migrations/            # 13 arquivos, ordem = prefixo de timestamp (DATA-MODEL §15)
+├── migrations/            # 14 arquivos, ordem = prefixo de timestamp (DATA-MODEL §15)
 ├── schema.sql             # GERADO: concatenação das migrations em begin; ... commit;
 ├── build-schema.mjs       # gera schema.sql
 ├── test/                  # harness PGlite + *.test.mjs (node:test)
@@ -54,6 +54,7 @@ existentes são preservados; linhas de catálogo apagadas pelo gestor **não** v
 | 11 | `20260915000011_rls.sql` | RLS, policies, revoke/grant final (§10) |
 | 12 | `20260915000012_storage_realtime.sql` | bucket `avatars`, policies de storage, publication realtime (§11–12) |
 | 13 | `20260915000013_seed.sql` | catálogo: settings, secrets, temporada do mês, 10 regras, 2 roletas + 14 prêmios, 6 conquistas, 7 recompensas (§13) |
+| 14 | `20260921000014_branding.sql` | marca: colunas `platform_name`/`brand_preset`/`logo_data_url`/`default_theme` em `app_settings`, `update_app_settings` estendida e RPC `get_branding()` para a tela de login (§4.1, §7.1) |
 
 O seed **não** cria pessoas, lançamentos, missões, filas, giros, resgates nem notificações.
 
@@ -73,9 +74,15 @@ cabeçalho em comentário e envolve tudo em `begin; ... commit;`.
 ```bash
 cd supabase/test
 npm install          # só na primeira vez (instala @electric-sql/pglite)
-npm test             # node --test ./*.test.mjs
+npm test             # node --test --test-concurrency=4 ./*.test.mjs
 npm run test:watch
 ```
+
+Cada arquivo de teste sobe um Postgres inteiro em WebAssembly. Sem limite, o `node --test`
+abre um processo por núcleo lógico e a suíte pode falhar por falta de memória em máquina
+modesta (ou com navegador/IDE abertos) — daí o `--test-concurrency=4` fixo no script. Se
+ainda assim aparecer falha esporádica, rode com `--test-concurrency=1`; com 4 a suíte
+completa leva ~15 s.
 
 Cada arquivo de teste cria um banco novo em memória, aplica o shim mínimo dos schemas
 `auth`/`storage` do Supabase (funções `auth.uid()`, `storage.foldername()`, roles

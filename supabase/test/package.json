@@ -4,8 +4,8 @@
   "type": "module",
   "description": "Testes do schema Supabase (PGlite em memória, sem Docker nem CLI).",
   "scripts": {
-    "test": "node --test ./*.test.mjs",
-    "test:watch": "node --test --watch ./*.test.mjs",
+    "test": "node --test --test-concurrency=4 ./*.test.mjs",
+    "test:watch": "node --test --watch --test-concurrency=4 ./*.test.mjs",
     "build:schema": "node ../build-schema.mjs"
   },
   "devDependencies": {
