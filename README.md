@@ -82,5 +82,7 @@ docs/spec/       # especificações e handoffs entre pacotes de trabalho
 6. **Primeiro acesso.** Entre com o gestor, ajuste empresa/temporada/código da equipe em
    Administração → Configurações; os colaboradores entram em `/signup` com o código e aguardam
    aprovação em Administração → Equipe → Pendentes.
+7. **Marca.** Configurações → Marca: nome da plataforma, cor de destaque (7 presets),
+   logo e tema padrão. Tudo pela interface — não é preciso editar código nem republicar.
 
 CI mínimo recomendado em cada PR: `npm ci && npm run lint && npm run typecheck && npm test && npm run build`.
