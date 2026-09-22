@@ -8,7 +8,7 @@ const STORAGE_QUOTA_STATUS = '403'
 type AvatarMime = (typeof AVATAR_MIME)[number]
 const isAllowedMime = (type: string): type is AvatarMime => (AVATAR_MIME as readonly string[]).includes(type)
 
-/** Valida MIME e tamanho antes de qualquer rede (Definition of Done WP6: > 1,5 MB ou SVG bloqueado antes do envio). */
+/** Valida MIME e tamanho antes de qualquer rede (> 1,5 MB ou SVG bloqueado antes do envio). */
 export function assertAvatarFile(file: File): void {
   if (!isAllowedMime(file.type)) throw new Error('Use uma imagem JPG, PNG ou WebP.')
   if (file.size > AVATAR_MAX_BYTES) throw new Error('A imagem precisa ter no máximo 1,5 MB.')

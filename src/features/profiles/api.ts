@@ -8,7 +8,7 @@ import type {
   VRanking,
 } from '@/lib/database.types'
 
-/** Read-model compartilhado de perfis (FRONTEND-ARCH §4.5 features/profiles — WP0). Só leitura. */
+/** Read-model compartilhado de perfis (FRONTEND-ARCH §4.5 features/profiles). Só leitura. */
 
 export type ActiveProfile = Pick<
   ProfileRow,
@@ -76,7 +76,7 @@ export async function getProfilePrivate(profileId: string): Promise<ProfilePriva
   return unwrap(supabase.from('profile_private').select('*').eq('profile_id', profileId).maybeSingle())
 }
 
-/** Promovido para cá porque Perfil (WP2) e Conquistas (WP5) consomem (regra §2.3). */
+/** Promovido para cá porque Perfil e Conquistas consomem (regra §2.3). */
 export async function getAchievementBoard(profileId: string): Promise<VAchievementBoard[]> {
   return unwrap(
     supabase.from('v_achievement_board').select('*').eq('profile_id', profileId).order('sort_order'),

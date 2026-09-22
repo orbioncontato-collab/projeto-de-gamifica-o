@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { zInt, zLocalDateTime, zMoneyOptional, zText, zTextOptional, zUuid } from '@/lib/forms'
 import type { MetricType, RuleTriggerKind } from '@/lib/database.types'
 
-/** Schemas de formulário de Pontuação (WP7). Limites espelham os CHECKs de DATA-MODEL §4.10/§7.4. */
+/** Schemas de formulário de Pontuação. Limites espelham os CHECKs de DATA-MODEL §4.10/§7.4. */
 
 export const RULE_METRICS: readonly MetricType[] = [
   'sale',

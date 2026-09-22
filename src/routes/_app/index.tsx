@@ -8,5 +8,5 @@ function HomePage() {
   return isAdmin ? <ManagerOverview /> : <CollaboratorDashboard />
 }
 
-/** / — Visão geral (colaborador) | Visão do gestor (admin), por `me.role` (WP2). */
+/** / — Visão geral (colaborador) | Visão do gestor (admin), por `me.role`. */
 export const Route = createFileRoute('/_app/')({ component: HomePage })

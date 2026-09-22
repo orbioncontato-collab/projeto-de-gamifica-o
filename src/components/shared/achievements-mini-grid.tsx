@@ -13,7 +13,7 @@ export interface AchievementsMiniGridProps {
   className?: string
 }
 
-/** Mini-grid de conquistas (Perfil, WP2) alimentado por `useAchievementBoard` de features/profiles. */
+/** Mini-grid de conquistas (Perfil, ) alimentado por `useAchievementBoard` de features/profiles. */
 export function AchievementsMiniGrid({ profileId, limit, className }: AchievementsMiniGridProps) {
   const query = useAchievementBoard(profileId)
   return (

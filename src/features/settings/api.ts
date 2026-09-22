@@ -14,7 +14,7 @@ import type {
   VSpecialEvent,
 } from '@/lib/database.types'
 
-/** Funções puras async de Configurações (FRONTEND-ARCH §4.5 features/settings — WP7). */
+/** Funções puras async de Configurações (FRONTEND-ARCH §4.5 features/settings). */
 
 export async function getAppSettings(): Promise<AppSettingsRow> {
   return unwrap(supabase.from('app_settings').select('*').eq('id', 1).single())

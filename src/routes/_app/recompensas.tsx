@@ -3,7 +3,7 @@ import { RewardsPage, type RewardsTab } from '@/features/rewards/components/rewa
 
 export type { RewardsTab }
 
-/** /recompensas?aba=loja|pedidos — `RewardsPage` (WP5). */
+/** /recompensas?aba=loja|pedidos — `RewardsPage`. */
 export const Route = createFileRoute('/_app/recompensas')({
   validateSearch: (s: Record<string, unknown>): { aba: RewardsTab } => ({
     aba: s['aba'] === 'pedidos' ? 'pedidos' : 'loja',

@@ -4,7 +4,7 @@ import { useTheme, type Theme } from '@/features/theme/use-theme'
 /**
  * Tema dos gráficos recharts (FRONTEND-ARCH §5): as cores vêm dos tokens de `styles/tokens.css`
  * resolvidos em tempo de execução (nenhum hex aqui). Recalcula quando `useTheme().theme` muda,
- * então os gráficos são recoloridos ao trocar o tema (DoD WP6).
+ * então os gráficos são recoloridos ao trocar o tema.
  */
 
 /** Tokens consumidos pelos gráficos — um `--nome` por chave. */

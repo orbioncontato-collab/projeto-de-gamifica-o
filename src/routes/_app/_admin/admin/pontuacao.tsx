@@ -7,7 +7,7 @@ export interface PointsSearch {
   perfil?: string
 }
 
-/** /admin/pontuacao?aba=regras|lancar|historico&perfil — `PointsPage` (WP7). */
+/** /admin/pontuacao?aba=regras|lancar|historico&perfil — `PointsPage`. */
 export const Route = createFileRoute('/_app/_admin/admin/pontuacao')({
   validateSearch: (s: Record<string, unknown>): PointsSearch => ({
     aba: s['aba'] === 'regras' || s['aba'] === 'historico' ? s['aba'] : 'lancar',

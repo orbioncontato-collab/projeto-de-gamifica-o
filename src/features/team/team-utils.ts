@@ -24,7 +24,7 @@ export const PROFILE_STATUS_PILL: Record<string, { label: string; tone: Tone }> 
   inactive: { label: 'Inativo', tone: 'muted' },
 }
 
-/** Pendente aparece na tabela "sem ações de pontos" (DoD WP6); só perfil ativo recebe pontos iniciais. */
+/** Pendente aparece na tabela "sem ações de pontos"; só perfil ativo recebe pontos iniciais. */
 export const canReceivePoints = (status: VProfileStats['status']): boolean => status === 'active'
 
 /** Próximo status ao clicar em Inativar/Reativar (pendente não passa por aqui — usa Aprovar/Recusar). */

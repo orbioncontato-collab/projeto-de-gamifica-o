@@ -31,7 +31,7 @@ export interface EditProfileDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-/** "Editar perfil" (FEATURE §9): nome, cor do avatar e foto; usa `useUpdateMyProfile`/`useUploadMyAvatar` do WP1. */
+/** "Editar perfil" (FEATURE §9): nome, cor do avatar e foto; usa `useUpdateMyProfile`/`useUploadMyAvatar`. */
 export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps) {
   const { me } = useMe()
   const update = useUpdateMyProfile()

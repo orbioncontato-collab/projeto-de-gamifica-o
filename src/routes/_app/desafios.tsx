@@ -6,7 +6,7 @@ export interface ChallengesSearch {
   gerenciar?: boolean
 }
 
-/** /desafios?novo&gerenciar — `ChallengesPage` (+ `ChallengesManager` se admin) (WP3). */
+/** /desafios?novo&gerenciar — `ChallengesPage` (+ `ChallengesManager` se admin). */
 export const Route = createFileRoute('/_app/desafios')({
   validateSearch: (s: Record<string, unknown>): ChallengesSearch => ({
     ...(s['novo'] === true || s['novo'] === 'true' ? { novo: true } : {}),

@@ -8,7 +8,7 @@ import { SharedDemos } from '@/components/shared/__demo__/demo-shared'
 import { UiDemos } from '@/components/shared/__demo__/demo-ui'
 
 /**
- * /dev/showcase — todos os componentes de `components/shared` e `components/ui` nos dois temas, lado a lado (WP8).
+ * /dev/showcase — todos os componentes de `components/shared` e `components/ui` nos dois temas, lado a lado.
  * Sem dados de pessoas: só catálogo (DATA-MODEL §13) e valores numéricos.
  * O seletor de largura simula 320/375/768/1024 px por coluna para conferir overflow horizontal.
  */

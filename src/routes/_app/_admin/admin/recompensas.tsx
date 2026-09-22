@@ -12,7 +12,7 @@ export interface RewardsAdminSearch {
 const STATUSES: readonly RedemptionStatus[] = ['requested', 'approved', 'delivered', 'cancelled']
 const isStatus = (v: unknown): v is RedemptionStatus => STATUSES.includes(v as RedemptionStatus)
 
-/** /admin/recompensas?aba=pedidos|catalogo&status&novo — `RewardsAdminPage` (WP5). */
+/** /admin/recompensas?aba=pedidos|catalogo&status&novo — `RewardsAdminPage`. */
 export const Route = createFileRoute('/_app/_admin/admin/recompensas')({
   validateSearch: (s: Record<string, unknown>): RewardsAdminSearch => ({
     aba: s['aba'] === 'catalogo' ? 'catalogo' : 'pedidos',

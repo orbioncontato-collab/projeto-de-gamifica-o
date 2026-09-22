@@ -14,7 +14,7 @@ export interface RewardsAdminPageProps {
   openNew?: boolean
 }
 
-/** /admin/recompensas?aba=pedidos|catalogo&status — fila de pedidos + catálogo CRUD (WP5). */
+/** /admin/recompensas?aba=pedidos|catalogo&status — fila de pedidos + catálogo CRUD. */
 export function RewardsAdminPage({ tab, status, openNew = false }: RewardsAdminPageProps) {
   const navigate = useNavigate()
   const go = (next: { aba: RewardsAdminTab; status?: RedemptionStatus }) => {

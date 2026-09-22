@@ -7,7 +7,7 @@ export interface MobileDrawerProps {
   onOpenChange: (open: boolean) => void
 }
 
-/** Drawer (`Sheet`) com a mesma navegação da sidebar; fecha ao navegar (Definition of Done WP1). */
+/** Drawer (`Sheet`) com a mesma navegação da sidebar; fecha ao navegar. */
 export function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

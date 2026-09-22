@@ -10,7 +10,7 @@ import { isCode, RPC_MESSAGES } from '@/lib/rpc-errors'
 import { notify } from '@/lib/notify'
 
 /**
- * Foto do perfil (FEATURE §9, DoD WP2): `useUploadMyAvatar` limpa `avatars/<me.id>` antes de subir;
+ * Foto do perfil (FEATURE §9, DoD ): `useUploadMyAvatar` limpa `avatars/<me.id>` antes de subir;
  * 403 (`AVATAR_QUOTA`) mostra "Limpe fotos antigas e tente de novo" + botão que limpa e repete o upload.
  */
 export function AvatarUpload() {

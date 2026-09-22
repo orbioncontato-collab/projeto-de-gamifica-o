@@ -56,7 +56,7 @@ beforeEach(() => {
 })
 
 describe('useDashboard', () => {
-  test('sem temporada ativa não consulta (DoD WP2)', async () => {
+  test('sem temporada ativa não consulta', async () => {
     const { wrapper } = setup()
     const { result } = renderHook(() => useDashboard(), { wrapper })
     await act(async () => {})

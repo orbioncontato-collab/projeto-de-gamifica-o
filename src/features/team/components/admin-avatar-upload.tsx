@@ -10,7 +10,7 @@ import { useAdminUploadAvatar } from '../hooks'
 import { cleanupAvatarFolder } from '../api'
 
 /**
- * Foto do colaborador pelo gestor (DoD WP6): valida ≤ 1,5 MB / MIME antes do envio, limpa `avatars/<profileId>`
+ * Foto do colaborador pelo gestor: valida ≤ 1,5 MB / MIME antes do envio, limpa `avatars/<profileId>`
  * antes de subir, remove a anterior após gravar; 403 (`AVATAR_QUOTA`) mostra o aviso + "Limpar fotos antigas".
  */
 export function AdminAvatarUpload({ profile }: { profile: VProfileStats }) {

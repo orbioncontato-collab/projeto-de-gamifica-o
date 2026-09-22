@@ -10,7 +10,7 @@ export interface UnderConstructionProps {
   owner?: string
 }
 
-/** Stub de rota (WP0): PageFrame + EmptyState "Em construção". Cada pacote substitui pela tela real. */
+/** Stub de rota: PageFrame + EmptyState "Em construção". Cada rota substitui pela tela real. */
 export function UnderConstruction({ eyebrow, title, subtitle, owner }: UnderConstructionProps) {
   return (
     <PageFrame eyebrow={eyebrow} title={title} {...(subtitle ? { subtitle } : {})}>

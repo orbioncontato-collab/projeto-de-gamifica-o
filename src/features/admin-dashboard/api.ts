@@ -1,7 +1,7 @@
 import { supabase, unwrap } from '@/lib/supabase'
 import type { VAdminKpis, VSalesTimeline, VTeamStats } from '@/lib/database.types'
 
-/** Leituras do Dashboard administrativo (FRONTEND-ARCH §4.5 features/admin-dashboard — WP6). Só leitura. */
+/** Leituras do Dashboard administrativo (FRONTEND-ARCH §4.5 features/admin-dashboard). Só leitura. */
 
 export async function getTeamStats(seasonId: string): Promise<VTeamStats | null> {
   const row = await unwrap(supabase.from('v_team_stats').select('*').eq('season_id', seasonId).maybeSingle())

@@ -10,7 +10,7 @@ import type {
 } from '@/lib/database.types'
 import { assertAvatarFile, cleanupAvatarFolder } from '@/features/auth/api'
 
-/** API da Equipe (FRONTEND-ARCH §4.5 features/team — WP6). Toda chamada supabase da feature vive aqui. */
+/** API da Equipe (FRONTEND-ARCH §4.5 features/team). Toda chamada supabase da feature vive aqui. */
 
 export { cleanupAvatarFolder }
 

@@ -67,7 +67,7 @@ const columns: Column<Row>[] = [
   { key: 'action', header: <span className="sr-only">Ações</span>, align: 'right', cell: viewLink },
 ]
 
-/** Tabela "Desempenho do time" (FEATURE §2b); "Ver desempenho" navega para `/admin/equipe?perfil=<id>` (§6 WP2). */
+/** Tabela "Desempenho do time" (FEATURE §2b); "Ver desempenho" navega para `/admin/equipe?perfil=<id>`. */
 export function TeamPerformanceTable({ rows }: { rows: Row[] }) {
   return (
     <PremiumCard as="section" aria-labelledby="team-performance-title">

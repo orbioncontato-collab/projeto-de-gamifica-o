@@ -207,7 +207,7 @@ export function SharedDemos({ avatarColors }: SharedDemosProps) {
         <EmptyState compact icon={Inbox} title="Vazio compacto" description="Variante compacta." />
         <ErrorState error={sampleError} onRetry={() => undefined} />
         <ErrorState error={new Error('Falha genérica')} compact />
-        <UnderConstruction eyebrow="Stub" title="Tela em construção" owner="WP0" />
+        <UnderConstruction eyebrow="Stub" title="Tela em construção" owner="—" />
       </Demo>
 
       <Demo title="Skeletons" stack>

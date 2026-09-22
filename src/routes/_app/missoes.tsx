@@ -7,7 +7,7 @@ export interface MissionsSearch {
   novo?: boolean
 }
 
-/** /missoes?filtro=hoje|semana|especiais&novo — `MissionsPage` (WP3). validateSearch como função pura (FRONTEND-ARCH §2.2). */
+/** /missoes?filtro=hoje|semana|especiais&novo — `MissionsPage`. validateSearch como função pura (FRONTEND-ARCH §2.2). */
 export const Route = createFileRoute('/_app/missoes')({
   validateSearch: (s: Record<string, unknown>): MissionsSearch => ({
     filtro: s['filtro'] === 'semana' || s['filtro'] === 'especiais' ? s['filtro'] : 'hoje',

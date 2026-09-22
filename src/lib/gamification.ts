@@ -185,7 +185,7 @@ export const conversionOf = (sales: number, meetings: number): number | null => 
   return Math.min(Math.round((sales / meetings) * 10000) / 100, 999.99)
 }
 
-/** Estado derivado da fila (assinatura de `useWheelState`, features/wheel — WP4) */
+/** Estado derivado da fila (assinatura de `useWheelState`, features/wheel) */
 export interface WheelState {
   mode: 'free' | 'turn' | 'pending'
   active: VWheelQueue | null

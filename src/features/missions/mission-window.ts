@@ -7,7 +7,7 @@ import { LIGHTNING_MAX_HOURS, type MissionFormInput, type MissionFormValues } fr
 /**
  * Regras puras do editor de missão (testadas): janela dentro da temporada, relâmpago ≤ 24 h,
  * conversão formulário ↔ `save_mission`. Espelha `private.validate_mission_window()` no cliente
- * para bloquear antes de enviar (Definition of Done WP3).
+ * para bloquear antes de enviar.
  */
 
 const HOUR_MS = 3_600_000

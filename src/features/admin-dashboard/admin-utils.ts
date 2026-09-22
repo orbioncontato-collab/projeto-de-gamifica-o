@@ -34,7 +34,7 @@ export const toPersonPoints = (rows: VRanking[], limit = 12): PersonPoints[] =>
     .slice(0, limit)
     .map((r) => ({ profileId: r.profile_id, name: r.full_name, points: r.points, color: r.color }))
 
-/** "Gráficos com 0 pontos mostram estado vazio" (DoD WP6): vazio quando nenhuma venda nem ponto acumulado. */
+/** "Gráficos com 0 pontos mostram estado vazio": vazio quando nenhuma venda nem ponto acumulado. */
 export const hasTimelineData = (rows: VSalesTimeline[]): boolean =>
   rows.some((r) => r.sales_cum > 0 || r.points_cum > 0 || r.entries_count > 0)
 

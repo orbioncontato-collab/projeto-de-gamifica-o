@@ -10,7 +10,7 @@ import type {
   VWallet,
 } from '@/lib/database.types'
 
-/** Funções puras async de Recompensas (FRONTEND-ARCH §4.5 features/rewards — WP5). */
+/** Funções puras async de Recompensas (FRONTEND-ARCH §4.5 features/rewards). */
 
 export type RecentCredit = Pick<
   PointEntryRow,

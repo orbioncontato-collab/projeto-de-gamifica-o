@@ -1,7 +1,7 @@
 import type { WheelPrizeRow } from '@/lib/database.types'
 
 /**
- * Motor puro da roleta (FRONTEND-ARCH §4.5, WP4). Convenção: o ponteiro é fixo no topo (0°),
+ * Motor puro da roleta (FRONTEND-ARCH §4.5, ). Convenção: o ponteiro é fixo no topo (0°),
  * o setor `i` cobre `[i*seg, (i+1)*seg)` graus a partir do topo no sentido horário, e a roda gira no
  * sentido horário (rotação CSS positiva). O `conic-gradient` e os rótulos usam a mesma convenção.
  */

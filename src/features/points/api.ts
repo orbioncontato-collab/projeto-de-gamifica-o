@@ -8,7 +8,7 @@ import type {
   VPointEntryHistory,
 } from '@/lib/database.types'
 
-/** Funções puras async de Pontuação (FRONTEND-ARCH §4.5 features/points — WP7). */
+/** Funções puras async de Pontuação (FRONTEND-ARCH §4.5 features/points). */
 
 export const HISTORY_PAGE_SIZE = 25
 

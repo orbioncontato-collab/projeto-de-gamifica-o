@@ -3,7 +3,7 @@ import { zInt, zLocalDate, zLocalDateTime, zMoney, zText, zTextOptional } from '
 import type { BrandPreset } from '@/lib/database.types'
 import { BRAND_PRESET_IDS, PLATFORM_NAME_MAX } from '@/features/branding/presets'
 
-/** Schemas de formulário de Configurações (WP7). Limites espelham DATA-MODEL §4.1/§4.3/§4.13. */
+/** Schemas de formulário de Configurações. Limites espelham DATA-MODEL §4.1/§4.3/§4.13. */
 
 export const COMPANY_NAME_MAX = 80
 export const XP_PER_LEVEL_MIN = 50
