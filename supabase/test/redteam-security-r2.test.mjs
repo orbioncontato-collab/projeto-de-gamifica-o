@@ -231,7 +231,7 @@ test('escalada: default privileges revogados — tabela/função/view/sequence n
     // só vale quando o catálogo tem a entrada — caso contrário fica registrada como incerteza do harness.
     const dacl = await t.sql(`select count(*)::int as n from pg_default_acl d join pg_namespace n on n.oid = d.defaclnamespace where n.nspname = 'public' and d.defaclobjtype = 'f'`)
     if (Number(dacl.rows[0].n) === 0) {
-      tc.diagnostic('PGlite não materializa ALTER DEFAULT PRIVILEGES (pg_default_acl vazio): EXECUTE de função nova não é verificável aqui (test-uncertain)')
+      tc.diagnostic('PGlite não materializa ALTER DEFAULT PRIVILEGES (pg_default_acl vazio): EXECUTE de função nova não é verificável aqui')
     } else {
       const f = await t.sql(`select has_function_privilege('authenticated', 'public.zz_probe_fn()', 'EXECUTE') as f_auth, has_function_privilege('anon', 'public.zz_probe_fn()', 'EXECUTE') as f_anon`)
       assert.deepEqual(f.rows[0], { f_auth: false, f_anon: false }, 'função nova em public nasceu executável (default privileges não revogados)')

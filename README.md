@@ -59,7 +59,7 @@ src/
   lib/           # supabase, tipos do banco, formatação pt-BR, regras puras de gamificação
   styles/        # tokens.css (única fonte de cores) · base.css · components.css
 supabase/        # migrations, schema.sql gerado e testes PGlite do banco
-docs/spec/       # especificações e handoffs entre pacotes de trabalho
+docs/spec/       # especificações do banco (DATA-MODEL) e do front (FRONTEND-ARCH)
 ```
 
 ## Deploy (resumo — o passo a passo completo, com capturas, está no Manual em PDF)
