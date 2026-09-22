@@ -57,6 +57,14 @@ async function invalidateSettings(qc: ReturnType<typeof useQueryClient>): Promis
   ])
 }
 
+const BRANDING_KEYS: readonly (keyof AppSettingsPatch)[] = [
+  'company_name',
+  'platform_name',
+  'brand_preset',
+  'logo_data_url',
+  'default_theme',
+]
+
 /** `rank_admins`/`auto_approve_members` também passam por aqui; ranking reflete após invalidar profiles. */
 export function useUpdateAppSettings(): UseMutationResult<AppSettingsRow, Error, AppSettingsPatch> {
   const qc = useQueryClient()
@@ -66,6 +74,7 @@ export function useUpdateAppSettings(): UseMutationResult<AppSettingsRow, Error,
       notify.success('Configurações salvas')
       await invalidateSettings(qc)
       if ('rank_admins' in patch) await qc.invalidateQueries({ queryKey: qk.profiles.all() })
+      if (BRANDING_KEYS.some((k) => k in patch)) await qc.invalidateQueries({ queryKey: qk.branding() })
     },
   })
 }

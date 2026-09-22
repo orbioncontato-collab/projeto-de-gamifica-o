@@ -24,9 +24,10 @@ export function applyTheme(theme: Theme): void {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => readDocumentTheme())
 
-  const setTheme = useCallback((next: Theme) => {
+  const setTheme = useCallback((next: Theme, options?: { persist?: boolean }) => {
     setThemeState(next)
     applyTheme(next)
+    if (options?.persist === false) return
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next)
     } catch {

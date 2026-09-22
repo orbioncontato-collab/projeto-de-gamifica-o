@@ -44,6 +44,10 @@ export type PublicTablesCore = {
         | 'target_activities_count'
         | 'rank_admins'
         | 'auto_approve_members'
+        | 'platform_name'
+        | 'brand_preset'
+        | 'logo_data_url'
+        | 'default_theme'
       >
     >
     Relationships: NoRel

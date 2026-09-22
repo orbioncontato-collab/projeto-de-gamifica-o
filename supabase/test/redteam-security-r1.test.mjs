@@ -29,7 +29,7 @@ const VIEWS = [
 ]
 // §7.9 — únicas funções de public executáveis por authenticated
 const AUTH_WHITELIST = [
-  'signup_mode', 'validate_team_code', 'get_bootstrap', 'get_dashboard', 'spin_wheel', 'spin_wheel_free', 'redeem_reward',
+  'signup_mode', 'validate_team_code', 'get_branding', 'get_bootstrap', 'get_dashboard', 'spin_wheel', 'spin_wheel_free', 'redeem_reward',
   'mark_notifications_read', 'is_active_member', 'is_admin', 'active_season_id', 'app_timezone', 'local_day', 'local_today',
   'iso_week_key', 'mission_period', 'avatar_count',
   'admin_update_profile', 'rotate_team_code', 'update_app_settings', 'save_special_event', 'recompute_stats', 'create_season',
@@ -38,7 +38,7 @@ const AUTH_WHITELIST = [
   'enqueue_wheel', 'update_queue_entry', 'remove_from_queue', 'release_turn', 'approve_spin', 'reject_spin', 'save_wheel_prizes',
   'handle_redemption',
 ]
-const ANON_WHITELIST = ['signup_mode', 'validate_team_code']
+const ANON_WHITELIST = ['signup_mode', 'validate_team_code', 'get_branding']
 
 const count = (tx, rel) => tx.query(`select count(*)::int as n from public.${rel}`).then((r) => Number(r.rows[0].n))
 const balance = async (uid) => Number((await t.sql('select coalesce(sum(coins),0)::int as b from public.point_entries where profile_id = $1', [uid])).rows[0].b)

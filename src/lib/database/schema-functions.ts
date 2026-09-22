@@ -2,6 +2,7 @@ import type {
   AdminProfilePatch,
   AppSettingsPatch,
   AppSettingsRow,
+  Branding,
   ChallengeRow,
   Json,
   MissionRow,
@@ -26,6 +27,7 @@ import type {
 export type PublicFunctions = {
   signup_mode: { Args: Record<string, never>; Returns: 'first_admin' | 'team_code' }
   validate_team_code: { Args: { p_code: string }; Returns: boolean }
+  get_branding: { Args: Record<string, never>; Returns: Branding }
   get_bootstrap: { Args: Record<string, never>; Returns: Json }
   get_dashboard: { Args: { p_profile_id?: string | null; p_season_id?: string | null }; Returns: Json }
   admin_update_profile: { Args: { p_profile_id: string; p_patch: AdminProfilePatch }; Returns: Json }

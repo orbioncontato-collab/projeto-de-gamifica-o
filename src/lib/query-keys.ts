@@ -4,6 +4,7 @@ import type { QueryClient } from '@tanstack/react-query'
 export const qk = {
   bootstrap: () => ['bootstrap'] as const,
   signupMode: () => ['signup-mode'] as const,
+  branding: () => ['branding'] as const,
   dashboard: {
     all: () => ['dashboard'] as const,
     one: (profileId: string | null, seasonId: string | null) =>

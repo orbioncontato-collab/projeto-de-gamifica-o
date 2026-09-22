@@ -5,9 +5,9 @@ import {
 } from '@/features/settings/components/platform-settings-page'
 
 export type { PlatformSettingsTab }
-const TABS: readonly PlatformSettingsTab[] = ['geral', 'temporadas', 'eventos', 'codigo']
+const TABS: readonly PlatformSettingsTab[] = ['geral', 'marca', 'temporadas', 'eventos', 'codigo']
 
-/** /admin/configuracoes?aba=geral|temporadas|eventos|codigo — `PlatformSettingsPage` (WP7). */
+/** /admin/configuracoes?aba=geral|marca|temporadas|eventos|codigo — `PlatformSettingsPage` (WP7). */
 export const Route = createFileRoute('/_app/_admin/admin/configuracoes')({
   validateSearch: (s: Record<string, unknown>): { aba: PlatformSettingsTab } => ({
     aba: TABS.includes(s['aba'] as PlatformSettingsTab) ? (s['aba'] as PlatformSettingsTab) : 'geral',

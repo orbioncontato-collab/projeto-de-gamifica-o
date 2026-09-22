@@ -51,6 +51,10 @@ const settings: AppSettingsRow = {
   streak_business_days_only: false,
   rank_admins: true,
   auto_approve_members: false,
+  platform_name: 'Sales League',
+  brand_preset: 'esmeralda',
+  logo_data_url: null,
+  default_theme: 'dark',
   updated_at: '2026-09-01T00:00:00Z',
   updated_by: null,
 }

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import { zInt, zLocalDate, zLocalDateTime, zMoney, zText, zTextOptional } from '@/lib/forms'
+import type { BrandPreset } from '@/lib/database.types'
+import { BRAND_PRESET_IDS, PLATFORM_NAME_MAX } from '@/features/branding/presets'
 
 /** Schemas de formulário de Configurações (WP7). Limites espelham DATA-MODEL §4.1/§4.3/§4.13. */
 
@@ -25,6 +27,15 @@ export const companyFormSchema = z.object({
 })
 export type CompanyFormInput = z.input<typeof companyFormSchema>
 export type CompanyFormValues = z.output<typeof companyFormSchema>
+
+/** Aba "Marca" (migration 14). A logo fica fora do form (estado próprio, ver BrandingForm). */
+export const brandingFormSchema = z.object({
+  platformName: zText(PLATFORM_NAME_MAX),
+  brandPreset: z.enum(BRAND_PRESET_IDS as [BrandPreset, ...BrandPreset[]]),
+  defaultTheme: z.enum(['dark', 'light']),
+})
+export type BrandingFormInput = z.input<typeof brandingFormSchema>
+export type BrandingFormValues = z.output<typeof brandingFormSchema>
 
 export const seasonFormSchema = z
   .object({

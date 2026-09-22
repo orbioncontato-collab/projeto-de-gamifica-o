@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from '@/lib/supabase'
 import { installZodPtBr } from '@/lib/forms'
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider'
 import { ThemeProvider } from '@/features/theme/theme-provider'
+import { BrandingProvider } from '@/features/branding/branding-provider'
 import { SplashScreen } from '@/features/auth/components/splash-screen'
 import { ConfigMissingScreen } from '@/components/shared/config-missing-screen'
 import { router } from './router'
@@ -43,9 +44,11 @@ function InnerApp() {
 function Root() {
   if (!isSupabaseConfigured()) return <ConfigMissingScreen />
   return (
-    <AuthProvider>
-      <InnerApp />
-    </AuthProvider>
+    <BrandingProvider>
+      <AuthProvider>
+        <InnerApp />
+      </AuthProvider>
+    </BrandingProvider>
   )
 }
 

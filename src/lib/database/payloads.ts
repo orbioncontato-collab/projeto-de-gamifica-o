@@ -1,4 +1,5 @@
 import type {
+  BrandPreset,
   ChallengeKind,
   ChallengeMetric,
   JobTitle,
@@ -241,6 +242,11 @@ export type AppSettingsPatch = {
   target_activities_count?: number
   rank_admins?: boolean
   auto_approve_members?: boolean
+  platform_name?: string
+  brand_preset?: BrandPreset
+  /** `null` apaga a logo; ausente mantém */
+  logo_data_url?: string | null
+  default_theme?: 'dark' | 'light'
 }
 export type SaveSpecialEventInput = {
   id?: string

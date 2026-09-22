@@ -17,14 +17,14 @@ after(async () => t?.close())
 const rows = async (text, params) => (await t.sql(text, params)).rows
 
 const DELETE_EXCEPTIONS = ['mission_participants', 'challenge_participants']
-const ANON_FUNCTIONS = ['signup_mode', 'validate_team_code']
+const ANON_FUNCTIONS = ['get_branding', 'signup_mode', 'validate_team_code']
 
 // §6.1 + §7 (7.1–7.8): tudo o que authenticated pode executar em public.
 const AUTHENTICATED_FUNCTIONS = [
   // §6.1 helpers
   'is_active_member', 'is_admin', 'active_season_id', 'app_timezone', 'local_day', 'local_today', 'iso_week_key', 'avatar_count', 'mission_period',
   // §7.1 cadastro e sessão
-  'signup_mode', 'validate_team_code', 'get_bootstrap', 'get_dashboard',
+  'signup_mode', 'validate_team_code', 'get_bootstrap', 'get_dashboard', 'get_branding',
   // §7.2 perfil e configuração
   'admin_update_profile', 'rotate_team_code', 'update_app_settings', 'save_special_event', 'recompute_stats',
   // §7.3 temporada

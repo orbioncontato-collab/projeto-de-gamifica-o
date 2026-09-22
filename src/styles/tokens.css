@@ -130,6 +130,117 @@
   --wheel-dark-4: #223043;
 }
 
+/* Presets de marca (app_settings.brand_preset, migration 14). `esmeralda` = valores acima.
+   Aplicados em html[data-brand] pelo BrandingProvider; também valem num elemento isolado (swatches).
+   Todos medidos ≥ 4.5:1 (texto sobre --bg/--card e --accent-fg sobre --accent) nos dois temas. */
+[data-brand='esmeralda'] {
+  --accent: #00e887;
+  --accent-hover: #00ff9c;
+  --ring: #00e887;
+  --glow-accent: 0 0 30px rgb(0 232 135 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(0 232 135 / 0.055), transparent 24rem);
+}
+[data-brand='safira'] {
+  --accent: #5b8dff;
+  --accent-hover: #7ca4ff;
+  --ring: #5b8dff;
+  --glow-accent: 0 0 30px rgb(91 141 255 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(91 141 255 / 0.055), transparent 24rem);
+}
+[data-brand='ametista'] {
+  --accent: #a78bfa;
+  --accent-hover: #c4b0ff;
+  --ring: #a78bfa;
+  --glow-accent: 0 0 30px rgb(167 139 250 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(167 139 250 / 0.055), transparent 24rem);
+}
+[data-brand='ambar'] {
+  --accent: #ffc83d;
+  --accent-hover: #ffd86b;
+  --ring: #ffc83d;
+  --glow-accent: 0 0 30px rgb(255 200 61 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 200 61 / 0.055), transparent 24rem);
+}
+[data-brand='coral'] {
+  --accent: #ff7a59;
+  --accent-hover: #ff977c;
+  --ring: #ff7a59;
+  --glow-accent: 0 0 30px rgb(255 122 89 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 122 89 / 0.055), transparent 24rem);
+}
+[data-brand='ciano'] {
+  --accent: #2dd4ff;
+  --accent-hover: #66e0ff;
+  --ring: #2dd4ff;
+  --glow-accent: 0 0 30px rgb(45 212 255 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(45 212 255 / 0.055), transparent 24rem);
+}
+[data-brand='rosa'] {
+  --accent: #ff6fb0;
+  --accent-hover: #ff8fc3;
+  --ring: #ff6fb0;
+  --glow-accent: 0 0 30px rgb(255 111 176 / 0.22);
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 111 176 / 0.055), transparent 24rem);
+}
+
+/* tema claro: versões escurecidas para AA como texto sobre branco */
+[data-theme='light'] [data-brand='esmeralda'],
+[data-theme='light'][data-brand='esmeralda'] {
+  --accent: #007f4b;
+  --accent-hover: #006e41;
+  --ring: #007f4b;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(0 232 135 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='safira'],
+[data-theme='light'][data-brand='safira'] {
+  --accent: #2451c9;
+  --accent-hover: #1d44ad;
+  --ring: #2451c9;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(91 141 255 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='ametista'],
+[data-theme='light'][data-brand='ametista'] {
+  --accent: #6d3fd6;
+  --accent-hover: #5c33ba;
+  --ring: #6d3fd6;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(167 139 250 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='ambar'],
+[data-theme='light'][data-brand='ambar'] {
+  --accent: #8a5a00;
+  --accent-hover: #754c00;
+  --ring: #8a5a00;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 200 61 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='coral'],
+[data-theme='light'][data-brand='coral'] {
+  --accent: #c2361d;
+  --accent-hover: #a52d18;
+  --ring: #c2361d;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 122 89 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='ciano'],
+[data-theme='light'][data-brand='ciano'] {
+  --accent: #0b6f8f;
+  --accent-hover: #095d78;
+  --ring: #0b6f8f;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(45 212 255 / 0.05), transparent 24rem);
+}
+[data-theme='light'] [data-brand='rosa'],
+[data-theme='light'][data-brand='rosa'] {
+  --accent: #b7176a;
+  --accent-hover: #9d1259;
+  --ring: #b7176a;
+  --glow-accent: 0 0 0 transparent;
+  --bg-glow: radial-gradient(circle at 18% 0%, rgb(255 111 176 / 0.05), transparent 24rem);
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-elevated: var(--bg-elevated);

@@ -5,7 +5,8 @@ export const THEME_STORAGE_KEY = 'orbion-theme'
 
 export interface ThemeContextValue {
   theme: Theme
-  setTheme: (theme: Theme) => void
+  /** `persist: false` aplica sem gravar preferência (tema padrão da marca — o usuário ainda "segue o padrão"). */
+  setTheme: (theme: Theme, options?: { persist?: boolean }) => void
   toggle: () => void
 }
 

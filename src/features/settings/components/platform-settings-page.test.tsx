@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { makeBootstrap, makeMe, renderInRouter } from '@/features/auth/test-utils'
 import { toMe } from '@/features/auth/bootstrap-query'
 import type {
@@ -15,9 +16,11 @@ const getAppSecrets = vi.fn()
 const getSeasons = vi.fn()
 const getSpecialEvents = vi.fn()
 const hasLedgerEntries = vi.fn()
+const updateAppSettings = vi.fn()
 let bootstrap: BootstrapPayload = makeBootstrap()
 
 vi.mock('@/lib/supabase', () => ({ supabase: {}, callRpc: vi.fn(), unwrap: vi.fn(), avatarUrl: () => null }))
+vi.mock('@/features/branding/api', () => ({ getBranding: vi.fn().mockResolvedValue(null) }))
 vi.mock('@/lib/realtime', () => ({
   subscribeToTables: () => () => undefined,
   useRealtimeInvalidate: () => undefined,
@@ -42,7 +45,7 @@ vi.mock('../api', () => ({
   getSeasons: (...a: unknown[]) => getSeasons(...a),
   getSpecialEvents: (...a: unknown[]) => getSpecialEvents(...a),
   hasLedgerEntries: (...a: unknown[]) => hasLedgerEntries(...a),
-  updateAppSettings: vi.fn(),
+  updateAppSettings: (...a: unknown[]) => updateAppSettings(...a),
   rotateTeamCode: vi.fn(),
   createSeason: vi.fn(),
   updateSeason: vi.fn(),
@@ -71,6 +74,10 @@ const SETTINGS: AppSettingsRow = {
   streak_business_days_only: false,
   rank_admins: true,
   auto_approve_members: false,
+  platform_name: 'Sales League',
+  brand_preset: 'esmeralda',
+  logo_data_url: null,
+  default_theme: 'dark',
   updated_at: '2026-09-01T00:00:00Z',
   updated_by: null,
 }
@@ -128,6 +135,10 @@ beforeEach(() => {
   getSeasons.mockReset().mockResolvedValue([])
   getSpecialEvents.mockReset().mockResolvedValue([])
   hasLedgerEntries.mockReset().mockResolvedValue(false)
+  updateAppSettings
+    .mockReset()
+    .mockImplementation(async (patch: Partial<AppSettingsRow>) => ({ ...SETTINGS, ...patch }))
+  delete document.documentElement.dataset['brand']
 })
 
 describe('PlatformSettingsPage', () => {
@@ -146,6 +157,50 @@ describe('PlatformSettingsPage', () => {
     await screen.findByLabelText(/Nome da empresa/)
     expect(await screen.findByText('Trava após o primeiro lançamento.')).toBeInTheDocument()
     expect(screen.getByRole('combobox', { name: /Fuso horário/ })).toBeDisabled()
+  })
+
+  test('aba Marca: nome da plataforma do seed, 7 cores com Esmeralda marcada, tema escuro, sem logo', async () => {
+    renderInRouter(<PlatformSettingsPage tab="marca" />)
+    expect(await screen.findByLabelText(/Nome da plataforma/)).toHaveValue('Sales League')
+    const radios = screen.getAllByRole('radio')
+    expect(radios).toHaveLength(7)
+    expect(screen.getByRole('radio', { name: 'Esmeralda' })).toBeChecked()
+    expect(screen.getByRole('radio', { name: 'Safira' })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: 'Enviar logo' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remover logo' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Salvar marca' })).toBeDisabled()
+  })
+
+  test('aba Marca: escolher cor pré-visualiza em html[data-brand] e salvar manda só o que mudou', async () => {
+    const user = userEvent.setup()
+    renderInRouter(<PlatformSettingsPage tab="marca" />)
+    await screen.findByLabelText(/Nome da plataforma/)
+    await user.click(screen.getByRole('radio', { name: 'Coral' }))
+    expect(screen.getByRole('radio', { name: 'Coral' })).toBeChecked()
+    expect(document.documentElement.dataset['brand']).toBe('coral')
+    const name = screen.getByLabelText(/Nome da plataforma/)
+    await user.clear(name)
+    await user.type(name, 'Liga Acme')
+    await user.click(screen.getByRole('button', { name: 'Salvar marca' }))
+    await waitFor(() => expect(updateAppSettings).toHaveBeenCalledTimes(1))
+    expect(updateAppSettings.mock.calls[0]?.[0]).toEqual({
+      platform_name: 'Liga Acme',
+      brand_preset: 'coral',
+    })
+  })
+
+  test('aba Marca: com logo salva, mostra prévia e "Remover logo" manda logo_data_url: null', async () => {
+    const PNG =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+    getAppSettings.mockResolvedValue({ ...SETTINGS, logo_data_url: PNG })
+    const user = userEvent.setup()
+    renderInRouter(<PlatformSettingsPage tab="marca" />)
+    expect(await screen.findByTestId('branding-logo-preview')).toHaveAttribute('src', PNG)
+    await user.click(screen.getByRole('button', { name: 'Remover logo' }))
+    expect(screen.queryByTestId('branding-logo-preview')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Salvar marca' }))
+    await waitFor(() => expect(updateAppSettings).toHaveBeenCalledTimes(1))
+    expect(updateAppSettings.mock.calls[0]?.[0]).toEqual({ logo_data_url: null })
   })
 
   test('aba Temporadas vazia', async () => {

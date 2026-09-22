@@ -29,9 +29,22 @@ export type AppSettingsRow = {
   streak_business_days_only: boolean
   rank_admins: boolean
   auto_approve_members: boolean
+  platform_name: string
+  brand_preset: BrandPreset
+  logo_data_url: string | null
+  default_theme: 'dark' | 'light'
   updated_at: string
   updated_by: string | null
 }
+
+/** Presets de cor da marca (migration 14 — check constraint em `app_settings.brand_preset`). */
+export type BrandPreset = 'esmeralda' | 'safira' | 'ametista' | 'ambar' | 'coral' | 'ciano' | 'rosa'
+
+/** rpc `get_branding` (anon): só o que a tela de login precisa antes de autenticar. */
+export type Branding = Pick<
+  AppSettingsRow,
+  'company_name' | 'platform_name' | 'brand_preset' | 'logo_data_url' | 'default_theme'
+>
 
 export type AppSecretsRow = {
   id: number

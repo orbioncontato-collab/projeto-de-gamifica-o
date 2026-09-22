@@ -39,6 +39,10 @@ export const EMPTY_APP_SETTINGS: AppSettingsRow = {
   ...TEST_SETTINGS,
   streak_business_days_only: false,
   auto_approve_members: false,
+  platform_name: 'Sales League',
+  brand_preset: 'esmeralda',
+  logo_data_url: null,
+  default_theme: 'dark',
   updated_at: NOW,
   updated_by: null,
 }
@@ -154,6 +158,19 @@ export function makeFakeSupabase({ bootstrap }: FakeSupabaseOptions) {
   const rpc = async (name: string, _args?: unknown) => {
     if (name === 'get_bootstrap') return { data: bootstrap, error: null }
     if (name === 'get_dashboard') return { data: { season: null }, error: null }
+    if (name === 'get_branding') {
+      const s = EMPTY_APP_SETTINGS
+      return {
+        data: {
+          company_name: bootstrap.settings.company_name,
+          platform_name: s.platform_name,
+          brand_preset: s.brand_preset,
+          logo_data_url: s.logo_data_url,
+          default_theme: s.default_theme,
+        },
+        error: null,
+      }
+    }
     return { data: null, error: null }
   }
   return {
