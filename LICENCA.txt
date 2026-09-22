@@ -1,5 +1,5 @@
 SALES LEAGUE — LICENÇA DE USO
-Orbion · versão 1.0
+Orbion · versão 1.1
 
 Este documento diz, em português claro, o que você pode e o que não pode fazer
 com o código e o material que recebeu. Ele vale a partir da data da compra.
@@ -47,7 +47,74 @@ com o código e o material que recebeu. Ele vale a partir da data da compra.
    existe condição para isso e ela é simples de resolver.
 
 
-5. GARANTIA E RESPONSABILIDADE
+5. DE QUEM É O CÓDIGO
+
+   A Orbion continua sendo a titular dos direitos sobre o Sales League. O que
+   você comprou é o direito de usar e modificar, nos termos acima, não a
+   propriedade do produto.
+
+   O que isso muda na prática: as modificações que você (ou quem você
+   contratar) fizer no código são suas e você não precisa entregá-las a
+   ninguém. Mas elas continuam sendo modificações de um produto da Orbion, e
+   as regras da seção 3 valem para a versão modificada do mesmo jeito.
+
+   Você não precisa de autorização da Orbion para alterar, adaptar ou manter o
+   sistema, nem para contratar terceiros para isso. A única exigência é que
+   quem receber acesso ao código — desenvolvedor, agência, funcionário — fique
+   igualmente obrigado à seção 3. Você responde pelo que essas pessoas fizerem
+   com o código que recebeu.
+
+
+6. SE ESTA LICENÇA FOR DESCUMPRIDA
+
+   As seções 1, 2, 4, 5 e 7 desta licença descrevem o uso normal e não há o que
+   descumprir nelas. O que encerra a licença é violar a seção 3 — revender,
+   sublicenciar, operar como serviço para terceiros ou publicar o código.
+
+   Nesse caso a Orbion avisa por escrito, por e-mail, descrevendo o que
+   aconteceu. Você tem 30 dias para corrigir. Corrigido no prazo, a licença
+   segue valendo normalmente e o assunto está encerrado.
+
+   Se não for corrigido, a licença termina — mas a sua instalação, os seus
+   dados e o que você já pagou não são afetados por isso: o sistema continua
+   funcionando na sua infraestrutura, porque a Orbion não tem nem quer ter
+   acesso a ele. O que termina é o direito de continuar distribuindo ou
+   explorando o produto fora dos limites contratados, além do suporte.
+
+   Nada aqui impede que a Orbion cobre na Justiça os prejuízos de uma revenda
+   ou operação como serviço não autorizada.
+
+
+7. DADOS PESSOAIS (LGPD)
+
+   A plataforma guarda dados dos seus colaboradores: nome, e-mail, telefone,
+   foto, equipe e todo o histórico de desempenho e pontuação.
+
+   Esses dados ficam exclusivamente no SEU projeto Supabase, sob a sua conta.
+   A Orbion não hospeda, não acessa, não recebe cópia e não tem qualquer forma
+   de ler essa base.
+
+   Para efeito da Lei 13.709/2018 (LGPD), a sua empresa é a CONTROLADORA
+   desses dados. Isso significa que cabe a você — não à Orbion:
+
+   - informar aos colaboradores que a plataforma existe e o que ela registra;
+   - ter base legal para o tratamento (normalmente o vínculo de trabalho e o
+     legítimo interesse na gestão de desempenho);
+   - atender pedidos de acesso, correção ou exclusão feitos por eles;
+   - decidir por quanto tempo o histórico é mantido;
+   - responder por incidentes de segurança na sua instalação.
+
+   A Orbion não figura como operadora, porque não realiza nenhum tratamento
+   por sua conta. Se a sua empresa tem DPO ou jurídico, vale avisá-los antes
+   de colocar o time para dentro — é uma conversa de cinco minutos.
+
+   Uma decisão de projeto ajuda aqui: o histórico de pontos é um registro
+   imutável (nada é apagado ou reescrito silenciosamente, só estornado). Isso
+   é bom para auditoria e para disputas internas, e é bom saber que existe
+   antes de prometer "apagamos tudo" a alguém.
+
+
+8. GARANTIA E RESPONSABILIDADE
 
    O produto é entregue no estado em que se encontra, testado e documentado,
    mas sem garantia de que atenderá a todo e qualquer uso específico.
@@ -63,7 +130,7 @@ com o código e o material que recebeu. Ele vale a partir da data da compra.
    versão modificada.
 
 
-6. SUPORTE
+9. SUPORTE
 
    Dúvidas sobre implantação e uso: orbioncontato@gmail.com
 
@@ -75,10 +142,17 @@ com o código e o material que recebeu. Ele vale a partir da data da compra.
    cobre desenvolvimento de funcionalidades novas nem manutenção de código que
    você tenha modificado — mas a Orbion pode orçar esses trabalhos à parte.
 
+   Nunca mande a senha do banco nem a Secret key. Nenhum atendimento precisa
+   delas, e quem pedir não é a Orbion.
 
-7. LEI APLICÁVEL
+
+10. LEI APLICÁVEL E FORO
 
    Esta licença é regida pelas leis da República Federativa do Brasil.
+
+   Fica eleito o foro da comarca de domicílio da Orbion para resolver o que
+   não se resolver por conversa — ressalvado o direito de a parte consumidora,
+   se for o caso, escolher o foro do seu próprio domicílio.
 
 
 Sales League é um produto da Orbion. Os dados são seus.
