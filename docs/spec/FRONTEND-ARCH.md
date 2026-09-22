@@ -130,7 +130,7 @@ Apêndice A — identidade visual a preservar (paleta e padrões do protótipo o
 
 Gerenciador de pacotes: **npm** (apagar `bun.lock` e `bunfig.toml`; commitar `package-lock.json`). Motivo: a Vercel detecta o install command pelo lockfile e o time não usa Bun.
 
-### 1.3 O que sai do repositório (apagar no pacote WP0)
+### 1.3 O que saiu do repositório do protótipo original
 
 | Item | Motivo |
 |---|---|
@@ -160,7 +160,7 @@ Mantidos em `src/components/ui/` (restilizados com tokens, sem `.dark` class —
 | `tooltip.tsx` | `react-tooltip` | ícones de ajuda |
 | `separator.tsx`, `skeleton.tsx`, `table.tsx`, `sonner.tsx` | — | |
 
-Apagados: `accordion, alert, aspect-ratio, avatar, badge, breadcrumb, calendar, card, carousel, chart, collapsible, command, context-menu, drawer, form, hover-card, input-otp, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, sidebar, slider, toggle, toggle-group`. `Avatar`, `Badge`, `Progress`, `PremiumCard` são componentes próprios em `components/shared` (identidade visual do produto, não a do shadcn). Gráficos usam `recharts` direto com `chart-theme.ts` (WP6).
+Apagados: `accordion, alert, aspect-ratio, avatar, badge, breadcrumb, calendar, card, carousel, chart, collapsible, command, context-menu, drawer, form, hover-card, input-otp, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, sidebar, slider, toggle, toggle-group`. `Avatar`, `Badge`, `Progress`, `PremiumCard` são componentes próprios em `components/shared` (identidade visual do produto, não a do shadcn). Gráficos usam `recharts` direto com `chart-theme.ts`.
 
 ### 1.5 Arquivos de configuração
 
@@ -294,15 +294,15 @@ src/
     utils.ts                    # cn()
   features/
     auth/
-      api.ts                    # signIn, signUp (validate_team_code → auth.signUp → updateUser), signOut, signupMode   [WP1]
-      hooks.ts                  # useSignupMode, useLogin, useSignup, useLogout, useUpdateMyProfile, useUploadMyAvatar, useUpdateMyPreferences   [WP1]
-      auth-provider.tsx         # AuthState, AuthProvider (onAuthStateChange), useAuth   [WP0]
-      bootstrap-query.ts        # getBootstrap, bootstrapQueryOptions() (usado em beforeLoad), useBootstrap, useMe   [WP0]
+      api.ts                    # signIn, signUp (validate_team_code → auth.signUp → updateUser), signOut, signupMode
+      hooks.ts                  # useSignupMode, useLogin, useSignup, useLogout, useUpdateMyProfile, useUploadMyAvatar, useUpdateMyPreferences
+      auth-provider.tsx         # AuthState, AuthProvider (onAuthStateChange), useAuth
+      bootstrap-query.ts        # getBootstrap, bootstrapQueryOptions() (usado em beforeLoad), useBootstrap, useMe
       components/
         login-form.tsx · signup-form.tsx · signup-success.tsx ("Cadastro enviado" — explica a aprovação; variante "confirme seu e-mail") · auth-layout.tsx
         awaiting-screen.tsx (/aguardando: `pending` → "aguardando aprovação" + "Verificar novamente"; `inactive` → "acesso desativado" + Sair) · splash-screen.tsx
-    profiles/                   # read-model compartilhado (WP0): v_profile_stats, v_ranking, profiles ativos, profiles pendentes (admin), profile_private, v_achievement_board
-      api.ts · hooks.ts         # inclui getAchievementBoard/useAchievementBoard (promovidos: Perfil (WP2) e Conquistas (WP5) consomem daqui) e getPendingMembers/usePendingMembers (Equipe (WP6) e sidebar (WP1) consomem daqui)
+    profiles/                   # read-model compartilhado: v_profile_stats, v_ranking, profiles ativos, profiles pendentes (admin), profile_private, v_achievement_board
+      api.ts · hooks.ts         # inclui getAchievementBoard/useAchievementBoard (promovidos: Perfil e Conquistas consomem daqui) e getPendingMembers/usePendingMembers (Equipe e sidebar consomem daqui)
       components/person-picker.tsx
     notifications/
       api.ts · hooks.ts
@@ -364,7 +364,7 @@ src/
       page-frame.tsx · premium-card.tsx · badge.tsx · progress.tsx · avatar.tsx · stat-card.tsx · section-header.tsx
       empty-state.tsx · error-state.tsx · query-boundary.tsx · skeletons.tsx
       confirm-dialog.tsx · countdown.tsx · money-input.tsx · form-field.tsx · data-table.tsx · status-pill.tsx · icon-tile.tsx
-      achievements-mini-grid.tsx  # usa useAchievementBoard de features/profiles; consumido por Perfil (WP2)
+      achievements-mini-grid.tsx  # usa useAchievementBoard de features/profiles; consumido por Perfil
     ui/                         # shadcn mantidos (§1.4)
   styles/
     tokens.css                  # :root/html[data-theme] + @theme inline
@@ -394,7 +394,7 @@ src/
 | `_app/_admin/admin/index.tsx` | `/admin` | `AdminDashboardPage` | admin | — |
 | `_app/_admin/admin/equipe.tsx` | `/admin/equipe` | `TeamPage` | admin | `perfil?: uuid` (abre `CollaboratorDetailDialog`), `busca?: string`, `editar?: uuid` (abre `CollaboratorEditorDialog`), `convidar?: boolean` (abre `InviteDialog` "Como adicionar colaboradores" — lê o código por `useTeamCode()` de `features/team`, nunca de `features/settings`), `pendentes?: boolean` (rola/foca a seção "Pendentes"; é o destino do badge da sidebar e da notificação "Novo membro aguardando aprovação") |
 | `_app/_admin/admin/pontuacao.tsx` | `/admin/pontuacao` | `PointsPage` | admin | `aba: 'regras'\|'lancar'\|'historico'` (default `lancar`), `perfil?: uuid` |
-| `_app/_admin/admin/recompensas.tsx` | `/admin/recompensas` | `RewardsAdminPage` | admin | `aba: 'pedidos'\|'catalogo'`, `status?: redemption_status`, `novo?: boolean` (abre o editor de recompensa — WP5) |
+| `_app/_admin/admin/recompensas.tsx` | `/admin/recompensas` | `RewardsAdminPage` | admin | `aba: 'pedidos'\|'catalogo'`, `status?: redemption_status`, `novo?: boolean` (abre o editor de recompensa) |
 | `_app/_admin/admin/roleta.tsx` | `/admin/roleta` | `PrizeEditor` (duas colunas) | admin | — |
 | `_app/_admin/admin/configuracoes.tsx` | `/admin/configuracoes` | `PlatformSettingsPage` | admin | `aba: 'geral'\|'temporadas'\|'eventos'\|'codigo'` |
 | `_app/_admin/admin/guia.tsx` | `/admin/guia` | `GuidePage` | admin | — |
@@ -413,8 +413,8 @@ Todo arquivo de rota é fino: valida search, lê `Route.useSearch()`/`useRouteCo
 ### 2.3 Regras de dependência entre camadas (verificadas em review)
 
 1. `routes/*` → importa só de `features/<x>/components/*-page.tsx`, `components/layout`, `lib`.
-2. `features/<x>` → importa de `lib/*`, `components/shared|ui|layout`, `features/auth/hooks` (`useMe`, `useAuth`), `features/profiles` (read-model), `features/theme/use-theme`. **Nunca** de outra feature. Precisa de algo de outra feature? Navega por URL (`<Link to="/admin/equipe" search={{ perfil: id }}>`) ou pede ao WP0 para promover a `features/profiles`/`components/shared`. Já promovidos por esta regra: `useAchievementBoard` (Perfil + Conquistas) → `features/profiles`; `AchievementsMiniGrid` → `components/shared`; leitura do `team_code` pela Equipe → `getTeamCode()` em `features/team/api.ts` (mesma chave `qk.settings.secrets()` que `features/settings` invalida ao rotacionar); nome da regra nos "últimos créditos" → embed `rule:point_rules(name)` na própria query de `features/rewards`.
-3. `components/shared` e `components/layout` → importam só de `lib`, `components/ui`, `features/auth/hooks` (layout precisa de `useMe`) e `features/notifications` (topbar; WP1 é dono de ambos), `features/theme`.
+2. `features/<x>` → importa de `lib/*`, `components/shared|ui|layout`, `features/auth/hooks` (`useMe`, `useAuth`), `features/profiles` (read-model), `features/theme/use-theme`. **Nunca** de outra feature. Precisa de algo de outra feature? Navega por URL (`<Link to="/admin/equipe" search={{ perfil: id }}>`) ou o símbolo é promovido a `features/profiles`/`components/shared`. Já promovidos por esta regra: `useAchievementBoard` (Perfil + Conquistas) → `features/profiles`; `AchievementsMiniGrid` → `components/shared`; leitura do `team_code` pela Equipe → `getTeamCode()` em `features/team/api.ts` (mesma chave `qk.settings.secrets()` que `features/settings` invalida ao rotacionar); nome da regra nos "últimos créditos" → embed `rule:point_rules(name)` na própria query de `features/rewards`.
+3. `components/shared` e `components/layout` → importam só de `lib`, `components/ui`, `features/auth/hooks` (layout precisa de `useMe`) e `features/notifications` (topbar), `features/theme`.
 4. `lib/*` → não importa de `features` nem `components`.
 5. `recharts` só é importado dentro de `features/admin-dashboard` (chunk separado pelo code splitting de rota).
 6. Nenhum componente lê `localStorage` diretamente, exceto `features/theme` (chave `orbion-theme`) e o supabase-js (sessão).
@@ -528,7 +528,7 @@ export const Route = createFileRoute('/_app/_admin')({
 })
 ```
 - `bootstrapQueryOptions()` = `queryOptions({ queryKey: qk.bootstrap(), queryFn: getBootstrap, staleTime: 60_000, gcTime: 5 * 60_000 })`. Realtime em `notifications`/`feed_events` e toda mutation relevante invalidam `qk.bootstrap()`.
-- `getBootstrap()` (`features/auth/bootstrap-query.ts`, WP0): `const data = await callRpc('get_bootstrap')`; em seguida, **retentativa da limpeza do código** (DATA-MODEL §6.4, §14.1 passo 6): `const { data: { user } } = await supabase.auth.getUser(); if (user?.user_metadata?.team_code) void supabase.auth.updateUser({ data: { team_code: null } }).catch(() => undefined)` — best-effort, sem `await` bloqueante e sem toast; repete em cada bootstrap até a metadata sumir. Retorna `data` sem esperar o `updateUser`.
+- `getBootstrap()` (`features/auth/bootstrap-query.ts`): `const data = await callRpc('get_bootstrap')`; em seguida, **retentativa da limpeza do código** (DATA-MODEL §6.4, §14.1 passo 6): `const { data: { user } } = await supabase.auth.getUser(); if (user?.user_metadata?.team_code) void supabase.auth.updateUser({ data: { team_code: null } }).catch(() => undefined)` — best-effort, sem `await` bloqueante e sem toast; repete em cada bootstrap até a metadata sumir. Retorna `data` sem esperar o `updateUser`.
 - `PROFILE_NOT_FOUND` só acontece com usuário criado no Auth sem trigger (instalação incompleta) ou perfil apagado à mão; o guard faz `signOut()` e mostra "Cadastro incompleto" (o `RouteErrorState` genérico não serve, porque "Tentar novamente" repetiria o erro para sempre).
 - `isAuthError(e)`: `RpcError.code in ('NOT_AUTHENTICATED','PROFILE_INACTIVE','PROFILE_PENDING')` ou PostgREST `code === '42501'` ou `'PGRST301'`. Componente global: `queryClient` `onError` (QueryCache) chama `handleGlobalError`: com `PROFILE_PENDING` (DATA-MODEL §6.2 `assert_active_member`) invalida o bootstrap e navega para `/aguardando` **sem** `signOut()`; com os demais faz `signOut()` quando o bootstrap já indicou perfil não ativo (DATA-MODEL §9). Na prática um pendente nunca dispara queries (o guard o mantém em `/aguardando`, e o banco não permite `active → pending`), então `PROFILE_PENDING` só chega ao front se uma aba antiga chamar uma RPC com bootstrap em cache — o tratamento existe para essa aba cair em `/aguardando` em vez de numa tela quebrada.
 - UI nunca "esconde" segurança: o banco nega tudo para inativos e não-admins; as guardas só evitam telas quebradas.
@@ -820,7 +820,7 @@ export interface SaveMissionInput { id?: string; title: string; description?: st
 export interface SaveChallengeInput { id?: string; name: string; description?: string | null; kind: Enums<'challenge_kind'>; metric: Enums<'challenge_metric'>; target_value: number; reward_points?: number; reward_coins?: number; reward_spin?: WheelKind | null; reward_description?: string | null; starts_at: string; ends_at: string; participant_ids: string[] }
 export interface SavePrizeInput { id?: string; label: string; kind: Enums<'prize_kind'>; value?: number | null; weight?: number; color?: string | null; sort_order: number; is_active?: boolean }
 ```
-Checklist de aceite do arquivo (WP0): 31 tabelas, 16 views, 39 funções (35 RPCs de DATA-MODEL §7 — inclusive `record_initial_points` e `save_special_event` — + `is_admin`, `is_active_member`, `active_season_id`, `app_timezone`), 22 enums (`profile_status` com 3 valores); `expectTypeOf<BootstrapPayload['me']>()` aceita `{ status: 'pending' }` e `isBlockedMe` estreita; `tsc` passa com `supabase.from('v_ranking').select('*').eq('season_id', id).order('rank')` retornando `VRanking[]`; `callRpc('spin_wheel', { p_queue_id })` retorna `SpinResultPayload`. Testes em `database.types.test.ts` com `expectTypeOf`.
+Checklist de aceite do arquivo: 31 tabelas, 16 views, 39 funções (35 RPCs de DATA-MODEL §7 — inclusive `record_initial_points` e `save_special_event` — + `is_admin`, `is_active_member`, `active_season_id`, `app_timezone`), 22 enums (`profile_status` com 3 valores); `expectTypeOf<BootstrapPayload['me']>()` aceita `{ status: 'pending' }` e `isBlockedMe` estreita; `tsc` passa com `supabase.from('v_ranking').select('*').eq('season_id', id).order('rank')` retornando `VRanking[]`; `callRpc('spin_wheel', { p_queue_id })` retorna `SpinResultPayload`. Testes em `database.types.test.ts` com `expectTypeOf`.
 
 ### 4.3 `src/lib/rpc-errors.ts`
 
@@ -889,7 +889,7 @@ Defaults do `QueryClient` (`lib/query-client.ts`): `staleTime: 30_000`, `gcTime:
 
 Convenção: `api.ts` exporta funções puras async (`getX`, `saveX`) que usam `supabase`/`callRpc`/`unwrap`; `hooks.ts` envolve em `useQuery`/`useMutation` com as chaves de `qk`. Todo `useQuery` de view aplica `.order()` explícito (PostgREST não garante ordem). Mutations retornam o `UseMutationResult` padrão; `onSuccess` invalida conforme a coluna "Invalida".
 
-**features/auth** (WP1, exceto `useAuth` em `auth-provider.tsx` e `useBootstrap`/`useMe` em `bootstrap-query.ts`, que são do WP0)
+**features/auth** (inclui `useAuth` em `auth-provider.tsx` e `useBootstrap`/`useMe` em `bootstrap-query.ts`)
 
 | Hook | Params | Retorna | Fonte | Invalida |
 |---|---|---|---|---|
@@ -905,7 +905,7 @@ Convenção: `api.ts` exporta funções puras async (`getX`, `saveX`) que usam `
 | `cleanupAvatarFolder(profileId, keepPath)` (função de `features/auth/api.ts`, reexportada em `features/team/api.ts`) | | `Promise<number>` (objetos removidos) | `storage.from('avatars').list(profileId)` → `remove()` de todo objeto cujo caminho `${profileId}/${name}` seja diferente de `keepPath` (o `avatar_path` atual); best-effort, nunca lança para o chamador do upload | — |
 | `useUpdateMyPreferences()` | `{ notifications?, event_alerts? }` | mutation | `profiles.update({ preferences })` | bootstrap |
 
-**features/profiles** (WP0 — read-model compartilhado)
+**features/profiles** (read-model compartilhado)
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -913,14 +913,14 @@ Convenção: `api.ts` exporta funções puras async (`getX`, `saveX`) que usam `
 | `useProfileStat(profileId, seasonId)` | | `VProfileStats \| null` | idem `.eq('profile_id').maybeSingle()` |
 | `useRanking(seasonId, limit?)` | | `VRanking[]` | `v_ranking` `.eq('season_id').order('rank')` |
 | `useActiveProfiles()` | | `Pick<ProfileRow,'id'\|'full_name'\|'avatar_path'\|'color'\|'job_title'\|'team'\|'role'>[]` | `profiles` `.eq('status','active').order('full_name')` — pendentes e inativos **nunca** entram em picker nenhum (lançar pontos, fila, missão, desafio) |
-| `usePendingMembers()` (admin) | | `PendingMember[]` | `profiles.select('id, full_name, avatar_path, color, created_at, profile_private(email)').eq('status', 'pending').order('created_at')` — chave `qk.profiles.pending()`; `enabled: isAdmin`; embed pela FK `profile_private.profile_id` (policy admin). Consumido por `PendingMembersSection` (WP6); o badge da sidebar **não** usa este hook (usa `bootstrap.pending_members`) |
+| `usePendingMembers()` (admin) | | `PendingMember[]` | `profiles.select('id, full_name, avatar_path, color, created_at, profile_private(email)').eq('status', 'pending').order('created_at')` — chave `qk.profiles.pending()`; `enabled: isAdmin`; embed pela FK `profile_private.profile_id` (policy admin). Consumido por `PendingMembersSection`; o badge da sidebar **não** usa este hook (usa `bootstrap.pending_members`) |
 | `useProfilePrivate(profileId)` | | `ProfilePrivateRow \| null` | `profile_private` `.eq('profile_id').maybeSingle()` (RLS: dono ou admin) |
-| `useAchievementBoard(profileId = me.id)` | | `VAchievementBoard[]` | `v_achievement_board.eq('profile_id').order('sort_order')` — chave `qk.achievements.one(profileId)`; **promovido** para cá porque Perfil (WP2) e Conquistas (WP5) consomem (regra §2.3) |
+| `useAchievementBoard(profileId = me.id)` | | `VAchievementBoard[]` | `v_achievement_board.eq('profile_id').order('sort_order')` — chave `qk.achievements.one(profileId)`; **promovido** para cá porque Perfil e Conquistas consomem (regra §2.3) |
 | `PersonPicker` (componente) | `{ value: string \| null; onChange; excludeIds?; placeholder? }` | select com avatar+nome | `useActiveProfiles` |
 
 Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` sem consultar (`enabled: !!seasonId`) e a UI mostra o estado "sem temporada" (§9).
 
-**features/notifications** (WP1)
+**features/notifications**
 
 | Hook | Retorna | Fonte |
 |---|---|---|
@@ -929,7 +929,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useNotificationsRealtime()` | efeito | `useRealtimeInvalidate({ table: 'notifications', filter: `profile_id=eq.${me.id}`, keys: [qk.notifications.all(), qk.bootstrap()] })` + `notify.info(title)` no INSERT |
 | `NotificationList` (componente) | — | item com `payload.action === 'approve_member'` (DATA-MODEL §6.4 passo 11) é clicável e navega para `/admin/equipe?pendentes=true`; os demais itens não navegam |
 
-**features/dashboard** (WP2)
+**features/dashboard**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -938,7 +938,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useTeamOverview(seasonId)` (gestor) | | `VTeamStats \| null` | `v_team_stats.eq('season_id').maybeSingle()` |
 | `useFeedRealtime()` | | efeito | `useRealtimeInvalidate({ table: 'feed_events', keys: [qk.feed(), qk.dashboard.all(), qk.bootstrap(), qk.profiles.all()] })` |
 
-**features/missions** (WP3)
+**features/missions**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -946,16 +946,16 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useMissionsAdmin(seasonId)` | | `(MissionRow & { participant_ids: string[] })[]` | `missions.select('*, mission_participants(profile_id)').is('deleted_at', null).eq('season_id').order('starts_at', desc)` |
 | `useSaveMission()` | `SaveMissionInput` | mutation → `MissionRow` | rpc `save_mission` → invalida missions, dashboard |
 | `useDeleteMission()` | `missionId` | mutation | rpc `delete_mission` |
-| `useMissionsRealtime()` | | efeito | cada feature assina o que precisa (não depende do WP2): `useRealtimeInvalidate({ table: 'feed_events', keys: [qk.missions.all(), qk.challenges.all()] })` |
+| `useMissionsRealtime()` | | efeito | cada feature assina o que precisa: `useRealtimeInvalidate({ table: 'feed_events', keys: [qk.missions.all(), qk.challenges.all()] })` |
 
-**features/challenges** (WP3)
+**features/challenges**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
 | `useChallengeBoard(seasonId, statuses = ['active','draft','finished'])` | | `VChallengeBoard[]` (participants é `jsonb` tipado `ChallengeParticipant[]`) | `v_challenge_board.eq('season_id').in('status').order('status').order('ends_at')` |
 | `useSaveChallenge()` / `useActivateChallenge()` / `useFinishChallenge()` / `useCancelChallenge()` | input / id | mutations | rpcs → invalida challenges; `finish` → `invalidateAfterLedgerChange` |
 
-**features/wheel** (WP4)
+**features/wheel**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -973,7 +973,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 
 `spin-engine.ts` (puro, testado): `SPIN_DURATION_MS = 8200`, `SPIN_EASING = 'cubic-bezier(0.04, 0.82, 0.12, 1)'`, `EXTRA_TURNS = 10`, `sectorAngle(count) = 360 / count`, `sectorCenterDeg(index, count)`, `targetRotation(current, index, count)` = `current + 360*EXTRA_TURNS + ((360 - sectorCenterDeg) % 360 - (current % 360) + 360) % 360` (ponteiro fixo no topo; a roda gira no sentido horário e **para exatamente** no setor `index`), `resolveSectorIndex(prizes, prizeId)` → `number | null` (se `null` ou `sector_count !== prizes.length` → refetch `wheel.config` antes de animar). Setor `i` cobre `[i*seg, (i+1)*seg)` graus a partir do topo, no sentido horário — o `conic-gradient` e os rótulos usam a mesma convenção.
 
-**features/rewards** (WP5)
+**features/rewards**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -987,13 +987,13 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useSaveReward()` | `RewardInsert & { id? }` | mutation | `rewards.upsert()` (policy admin) → rewards |
 | `useDeleteReward()` | `id` | mutation | `rewards.update({ deleted_at: now, is_active: false })` |
 
-**features/achievements** (WP5)
+**features/achievements**
 
 | Hook | Retorna | Fonte |
 |---|---|---|
-| (sem hooks próprios) | — | consome `useAchievementBoard` de `features/profiles` (promovido no WP0); `AchievementsPage` renderiza `AchievementCard` por linha e o contador "N de M" |
+| (sem hooks próprios) | — | consome `useAchievementBoard` de `features/profiles`; `AchievementsPage` renderiza `AchievementCard` por linha e o contador "N de M" |
 
-**features/admin-dashboard** (WP6)
+**features/admin-dashboard**
 
 | Hook | Retorna | Fonte |
 |---|---|---|
@@ -1002,7 +1002,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useSalesTimeline(seasonId)` | `VSalesTimeline[]` | `v_sales_timeline.eq('season_id').order('day')` |
 | gráfico de pontos por colaborador | `VRanking[]` | `useRanking(seasonId)` (features/profiles) |
 
-**features/team** (WP6)
+**features/team**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -1015,7 +1015,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useAdminUploadAvatar()` | `{ profileId, file }` | mutation → `avatar_path` | valida MIME/tamanho → `cleanupAvatarFolder(profileId, currentAvatarPath)` → storage upload em `${profileId}/avatar-<epoch>.<ext>` (policy admin) → `admin_update_profile({ avatar_path })` → `storage.remove([old])` best-effort; 403 → `AVATAR_QUOTA` + botão "Limpar fotos antigas" (mesmo tratamento de `useUploadMyAvatar`) |
 | `useTeamCode()` (admin) | | `string` | `getTeamCode()` = `unwrap(supabase.from('app_secrets').select('team_code').eq('id', 1).single()).then(r => r.team_code)` — chave `qk.settings.secrets()` (a mesma que `useRotateTeamCode` invalida); usado só pelo `InviteDialog` (`?convidar=true`), exibido com `maskTeamCode` de `lib/format` |
 
-**features/points** (WP7)
+**features/points**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -1027,7 +1027,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useRecordManualEntry()` | `RpcArgs<'record_manual_entry'>` | mutation → `PointEntryRow` | rpc → idem |
 | `useReverseEntry()` | `{ entryId, reason }` | mutation → `PointEntryRow` | rpc → idem |
 
-**features/settings** (WP7)
+**features/settings**
 
 | Hook | Params | Retorna | Fonte |
 |---|---|---|---|
@@ -1147,7 +1147,7 @@ export const spinButtonLabel = (state: WheelState, spinning: boolean) => string 
 - Erros de campo em pt-BR via `z.config({ customError })` global em `main.tsx` (zod 4).
 - `dates.ts`: `toDateTimeLocalValue(iso, tz)` / `fromDateTimeLocalValue(value, tz)` (converte para ISO com offset do fuso do app, não do navegador — a temporada e as janelas são no fuso de `settings.timezone`), `todayLocal(tz)`, `seasonContains(season, iso)`, `isoWeekKey(date)`.
 
-### 4.11 Componentes compartilhados — contratos de props (WP0 cria, WP8 refina; ninguém mais altera)
+### 4.11 Componentes compartilhados — contratos de props (ninguém mais altera)
 
 | Componente | Props | Comportamento |
 |---|---|---|
@@ -1171,7 +1171,7 @@ export const spinButtonLabel = (state: WheelState, spinning: boolean) => string 
 | `DataTable<T>` | `{ columns: Column<T>[]; rows: T[]; rowKey; empty: ReactNode; mobileCard?: (row: T) => ReactNode; onRowClick? }` | tabela em `md+`, cards abaixo (padrão Equipe/Histórico) |
 | `ThemeSwitch` | — | dois botões Escuro/Claro (`aria-pressed`) |
 
-Cada componente tem story-like demo em `src/components/shared/__demo__/showcase.tsx` (rota `/dev/showcase` só em `import.meta.env.DEV`) para o WP8 validar os dois temas sem depender das features.
+Cada componente tem story-like demo em `src/components/shared/__demo__/showcase.tsx` (rota `/dev/showcase` só em `import.meta.env.DEV`) para validar os dois temas sem depender das features.
 
 ---
 
@@ -1254,7 +1254,7 @@ html[data-theme='light'] {
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } } /* única exceção de !important permitida: acessibilidade */
 }
 ```
-Fonte: usar a pilha do sistema (sem Google Fonts por padrão — sem dependência externa nem CSP extra). Se o produto quiser Inter, self-host em `public/fonts` com `font-display: swap` (decisão do WP8).
+Fonte: usar a pilha do sistema (sem Google Fonts por padrão — sem dependência externa nem CSP extra). Se o produto quiser Inter, self-host em `public/fonts` com `font-display: swap`.
 
 ### 5.4 `src/styles/components.css`
 Classes de identidade (usadas pelos componentes de `components/shared`, não diretamente pelas features): `.premium-card` (gradiente `--card-from/--card-to`, borda `--line`, raio `--radius-card`, sombra `--shadow-card`), `.premium-card[data-tone=green|gold|purple|red|blue]` (gradientes tonais do original: `#102A28→#0D1B2A`, `#241F14→#151D29`, `#261D43→#111F30`, `#35161D→#111F30`, `#172C56→#111F30` em dark; em light: `#EEFCF6→#fff`, `#FFF9E8→#fff`, `#F3EEFF→#fff`, `#FFF1F1→#fff`, `#EEF3FF→#fff`), `.eyebrow`, `.field-label`, `.field-input`, `.podium-glow`, `.glass` (sidebar/topbar), `.orbion-toast`, `@keyframes confetti-fall`, `.confetti-layer` (portado), `.nav-item[data-status=active]`.
