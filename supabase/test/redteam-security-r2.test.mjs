@@ -649,7 +649,7 @@ test('args hostis (tipo): save_mission / save_challenge / save_wheel_prizes com 
       if (!CODE_RE.test(e.message)) raw.push(`save_wheel_prizes(${kind}, ${JSON.stringify(prizes).slice(0, 60)}) → ${e.message.slice(0, 90)} [${e.code}]`)
     }
   }
-  // SQL fixer r2 (test-uncertain): p_wheel_kind é `public.wheel_kind` na assinatura de §7.6 — 'bogus' é rejeitado
+  // Nota de implementação: p_wheel_kind é `public.wheel_kind` na assinatura de §7.6 — 'bogus' é rejeitado
   // pelo cast do argumento (22P02) ANTES de a função executar, fora do alcance de qualquer handler em SQL. O front
   // só envia valores do enum. O que a spec exige (§9) é que nada seja gravado — verificado pelo snapshot abaixo.
   const enumErr = await expectAnyError(t.rpcRow(admin, 'save_wheel_prizes', { p_wheel_kind: 'bogus', p_prizes: pr({}) }))

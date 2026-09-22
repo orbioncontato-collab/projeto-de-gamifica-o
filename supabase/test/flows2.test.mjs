@@ -119,8 +119,8 @@ test('14.6.3 reverse_entry inverte pontos, moedas e valor, herda occurred_at/sea
   assert.equal(num(reversal.amount), -8500)
   assert.equal(num(reversal.base_points), -100)
   assert.equal(num(reversal.multiplier), 1)
-  // SQL fixer r2: §7.4 — estorno de rule/manual/system nasce com source = 'system' (herda rule_id, não a source);
-  // a assertiva anterior ('rule') contrariava a spec e está registrada em supabase/DECISIONS.md.
+  // Nota de implementação: §7.4 — estorno de rule/manual/system nasce com source = 'system' (herda rule_id, não a source);
+  // a assertiva anterior ('rule') contrariava a spec (DATA-MODEL §7.4).
   assert.equal(reversal.source, 'system')
   assert.equal(reversal.metric, 'sale')
   assert.equal(reversal.rule_id, ruleSale.id)
@@ -429,14 +429,14 @@ test('B.16 entradas às 23:30 e 00:30 locais (mesmo dia UTC) contam 2 dias de st
   await t.rpcRow(admin, 'reverse_entry', { p_entry_id: late3.id, p_reason: 'x' })
   const lsAfter = await lifetime(memberC)
   assert.equal(num(lsAfter.streak_days), 1)
-  // SQL fixer r1: §6.2 manda recompute_streak gravar best_streak_days = max(ilhas) do ledger (não greatest com o valor antigo),
+  // Nota de implementação: §6.2 manda recompute_streak gravar best_streak_days = max(ilhas) do ledger (não greatest com o valor antigo),
   // para recompute_stats reproduzir o ledger (§7.2) e corrigir um best adulterado. O estorno apagou o dia que formava a
-  // sequência de 2, logo o melhor streak segundo o ledger passa a ser 1 (ver supabase/DECISIONS.md).
+  // sequência de 2, logo o melhor streak segundo o ledger passa a ser 1.
   assert.equal(num(lsAfter.best_streak_days), 1, 'melhor streak segue o ledger após estorno (max das ilhas)')
   // v_profile_stats mostra o streak vivo (streak_last_day ≥ ontem)
   const me = await t.asUser(memberC, async (tx) => (await tx.query('select streak_days, best_streak_days from public.v_profile_stats where profile_id = $1 and season_id = $2', [memberC, activeSeason.id])).rows[0])
   assert.equal(num(me.streak_days), 1)
-  assert.equal(num(me.best_streak_days), 1) // idem: max das ilhas do ledger (SQL fixer r1)
+  assert.equal(num(me.best_streak_days), 1) // idem: max das ilhas do ledger 
   // recompute_stats reproduz o mesmo streak
   await t.rpc(admin, 'recompute_stats', { p_profile_id: memberC })
   const lsRe = await lifetime(memberC)

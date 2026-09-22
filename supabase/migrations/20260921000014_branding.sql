@@ -64,7 +64,7 @@ begin
       else p_patch end);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;

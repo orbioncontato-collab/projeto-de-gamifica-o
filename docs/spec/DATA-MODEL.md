@@ -1,6 +1,6 @@
 # DATA-MODEL — Orbion Sales League (especificação final do banco Supabase)
 
-> Versão final, 15/09/2026, revisada após a revisão adversarial (Apêndice D). **Revisão 15/09/2026 (tarde): aprovação de membros** — colaborador que se cadastra com `team_code` nasce `pending` até um gestor aprovar; `app_settings.auto_approve_members` liga a auto-aprovação (Apêndice B.21; §3, §4.1, §6.4, §7.1, §7.2, §14.1, §16.2). Substitui `DRAFT-data-model.md`. Base de verdade para quem for escrever `supabase/schema.sql` e `supabase/migrations/*.sql`: **nada aqui é sugestão** — tabela, coluna, constraint, função, trigger, policy e seed estão fechados. O que ficou deliberadamente de fora está no Apêndice A (achados recusados) e no Apêndice B (decisões de produto com alternativa registrada).
+> Versão final, 15/09/2026, revisada após a revisão adversarial (Apêndice D). **Revisão 15/09/2026 (tarde): aprovação de membros** — colaborador que se cadastra com `team_code` nasce `pending` até um gestor aprovar; `app_settings.auto_approve_members` liga a auto-aprovação (Apêndice B.21; §3, §4.1, §6.4, §7.1, §7.2, §14.1, §16.2). Base de verdade para quem for escrever `supabase/schema.sql` e `supabase/migrations/*.sql`: **nada aqui é sugestão** — tabela, coluna, constraint, função, trigger, policy e seed estão fechados. O que ficou deliberadamente de fora está no Apêndice A (achados recusados) e no Apêndice B (decisões de produto com alternativa registrada).
 >
 > Decisões já tomadas e NÃO reabertas: Vite SPA; single-tenant por instalação; 1º cadastro vira admin; colaboradores se cadastram com `team_code`; **só admins registram atividades comerciais** (colaborador é somente leitura, exceto resgatar recompensa e editar nome/foto/preferências próprias); deploy na Vercel; Supabase = Postgres + Auth + Storage (sem Edge Functions).
 >
@@ -1922,7 +1922,7 @@ Depois: criar o dono pelo Dashboard (§16.1 passo 3), rotacionar o `team_code` n
 
 ## Apêndice C — mapa tela → objetos
 
-| tela / componente (FEATURE-INVENTORY) | leitura | escrita |
+| tela / componente (FRONTEND-ARCH §4) | leitura | escrita |
 |---|---|---|
 | Login / Cadastro | `signup_mode`, `validate_team_code` (só UX) | `auth.signUp`, `auth.signInWithPassword`, `updateUser({data:{team_code:null}})` |
 | Layout (topbar, sidebar, sino, chip moedas/temporada) | `get_bootstrap`, `notifications` (own), Realtime `notifications` | `mark_notifications_read`, `profiles.preferences` |

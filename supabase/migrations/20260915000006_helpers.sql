@@ -322,7 +322,7 @@ begin
 end $$;
 
 -- Delta que uma entry soma num desafio (§4.18); 0 se não se aplica.
--- DECISIONS.md (SQL fixer r2): stable (não immutable) — para métrica 'activities' o estorno (source 'system', §7.4)
+-- Nota de implementação: stable (não immutable) — para métrica 'activities' o estorno (source 'system', §7.4)
 -- precisa olhar a source da original para decrementar o que ela somou.
 create or replace function private.challenge_value(p_metric public.challenge_metric, p_entry public.point_entries)
 returns numeric language plpgsql stable security definer set search_path = ''

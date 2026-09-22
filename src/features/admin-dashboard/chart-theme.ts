@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTheme, type Theme } from '@/features/theme/use-theme'
 
 /**
- * Tema dos gráficos recharts (FRONTEND-ARCH §6 WP6): as cores vêm dos tokens de `styles/tokens.css`
+ * Tema dos gráficos recharts (FRONTEND-ARCH §5): as cores vêm dos tokens de `styles/tokens.css`
  * resolvidos em tempo de execução (nenhum hex aqui). Recalcula quando `useTheme().theme` muda,
  * então os gráficos são recoloridos ao trocar o tema (DoD WP6).
  */

@@ -6,8 +6,8 @@ painel do gestor. Interface em português do Brasil.
 
 - **Frontend:** Vite 8 · React 19 · TanStack Router/Query · Tailwind 4 · shadcn/ui · recharts 3
 - **Backend:** Supabase (Postgres + Auth + Realtime + Storage) — todo o negócio vive no banco (RPCs, views, RLS)
-- **Especificações:** `docs/spec/DATA-MODEL.md` (banco, fonte da verdade), `docs/spec/FRONTEND-ARCH.md`
-  (arquitetura do front), `docs/spec/FEATURE-INVENTORY.md` (inventário de telas)
+- **Especificações:** `docs/spec/DATA-MODEL.md` (banco, fonte da verdade) e `docs/spec/FRONTEND-ARCH.md`
+  (arquitetura do front, com o inventário de telas por rota)
 
 ## Requisitos
 

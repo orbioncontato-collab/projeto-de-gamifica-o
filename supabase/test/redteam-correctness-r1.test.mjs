@@ -398,8 +398,8 @@ test('roleta com todos os prêmios inativos → MIN_PRIZES no commit; só 1 ativ
   await expectError(setPrizes('classic', [{ label: 'A', kind: 'points', value: 10 }, { label: 'B', kind: 'points', value: 20, is_active: false }]), 'MIN_PRIZES')
   await expectError(setPrizes('classic', [{ label: 'Mistério', kind: 'mystery' }, { label: 'Extra', kind: 'extra_spin' }]), 'MYSTERY_NEEDS_POOL')
   await expectError(setPrizes('classic', [{ label: 'A', kind: 'points', value: 10, sort_order: 3 }, { label: 'B', kind: 'points', value: 20, sort_order: 3 }]), 'SORT_ORDER_DUPLICATE')
-  // SQL fixer r2: peso fora de [1, 1000] → INVALID_ARGUMENT (P0001, detail cita a constraint) — §9 exige que toda
-  // escrita via RPC devolva código do catálogo; o 23514 cru que esta assertiva esperava era test-uncertain (DECISIONS.md).
+  // Nota de implementação: peso fora de [1, 1000] → INVALID_ARGUMENT (P0001, detail cita a constraint) — §9 exige que toda
+  // escrita via RPC devolva código do catálogo; o 23514 cru que esta assertiva esperava não vinha do catálogo (DATA-MODEL §9).
   const err = await expectError(setPrizes('classic', [{ label: 'A', kind: 'points', value: 10, weight: 0 }, { label: 'B', kind: 'points', value: 20 }]), 'INVALID_ARGUMENT')
   assert.equal(err.code, 'P0001')
   assert.match(err.detail ?? '', /weight/i)

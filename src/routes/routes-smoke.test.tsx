@@ -8,7 +8,7 @@ import { emptyBootstrapFor, makeFakeSupabase, TEST_SESSION, TEST_USER_ID } from 
 import { THEME_STORAGE_KEY, type Theme } from '@/features/theme/use-theme'
 
 /**
- * Smoke de integração (onda 3, FRONTEND-ARCH §7 DoD): toda rota renderiza com banco recém-instalado
+ * Smoke de integração (FRONTEND-ARCH §2.2): toda rota renderiza com banco recém-instalado
  * (nenhuma linha, `season = null`) para gestor e colaborador, nos dois temas, sem lançar e sem estourar o
  * `RouteErrorState`. Nenhum dado fictício de pessoa: o `me` é o usuário genérico de teste.
  */

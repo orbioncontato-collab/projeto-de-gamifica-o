@@ -18,7 +18,7 @@ export interface PendingMembersSectionProps {
 }
 
 /**
- * Seção "Pendentes" (FRONTEND-ARCH §6 WP6, DATA-MODEL §7.2): acima da tabela, visível só com ≥ 1 pedido
+ * Seção "Pendentes" (FRONTEND-ARCH §4.5, DATA-MODEL §7.2): acima da tabela, visível só com ≥ 1 pedido
  * ou `?pendentes=true`. Funciona sem temporada ativa (`usePendingMembers` não depende de `season_id`).
  */
 export const PendingMembersSection = forwardRef<HTMLElement, PendingMembersSectionProps>(

@@ -31,7 +31,7 @@ const EMPTY_TITLE: Record<MissionFilter, string> = {
   especiais: 'Nenhuma missão especial',
 }
 
-/** Missões (FEATURE-INVENTORY §4): filtros por URL, relâmpago com contador, cards com progresso, gestão para admin. */
+/** Missões: filtros por URL, relâmpago com contador, cards com progresso, gestão para admin. */
 export function MissionsPage({ filter, openNew }: MissionsPageProps) {
   const { isAdmin, season } = useMe()
   const navigate = useNavigate()

@@ -23,7 +23,7 @@ export interface PlatformSettingsPageProps {
 
 const TABS: readonly PlatformSettingsTab[] = ['geral', 'marca', 'temporadas', 'eventos', 'codigo']
 
-/** /admin/configuracoes — abas Geral / Marca / Temporadas / Eventos / Código (FEATURE-INVENTORY §13). */
+/** /admin/configuracoes — abas Geral / Marca / Temporadas / Eventos / Código. */
 export function PlatformSettingsPage({ tab }: PlatformSettingsPageProps) {
   const navigate = useNavigate()
   const settings = useAppSettings()

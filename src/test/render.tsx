@@ -32,7 +32,7 @@ export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptio
 
 /**
  * Renderiza `ui` dentro de um router de memória (Link/useNavigate/useRouter funcionam) + QueryClient + Theme.
- * Helper comum a todos os testes de página (promovido de `features/auth/test-utils` — handoffs WP5/WP7).
+ * Helper comum a todos os testes de página (promovido de `features/auth/test-utils` — ).
  */
 export function renderInRouter(ui: ReactElement, initialPath = '/') {
   const queryClient = createTestQueryClient()

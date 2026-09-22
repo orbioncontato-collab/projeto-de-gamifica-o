@@ -10,7 +10,6 @@ supabase/
 ├── schema.sql             # GERADO: concatenação das migrations em begin; ... commit;
 ├── build-schema.mjs       # gera schema.sql
 ├── test/                  # harness PGlite + *.test.mjs (node:test)
-├── DECISIONS.md           # decisões de implementação fora do que a spec fixa
 └── README.md
 ```
 

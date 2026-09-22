@@ -15,7 +15,7 @@ import { PointsLineChart } from './points-line-chart'
 import { HealthIndicators } from './health-indicators'
 import { OperationsBar } from './operations-bar'
 
-/** /admin — Dashboard administrativo (FEATURE §10, FRONTEND-ARCH §6 WP6). */
+/** /admin — Dashboard administrativo (FRONTEND-ARCH §4.5). */
 export function AdminDashboardPage() {
   const { season, seasonId } = useMe()
   const stats = useTeamStats(seasonId)

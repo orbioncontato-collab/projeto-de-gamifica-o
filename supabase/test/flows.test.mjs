@@ -453,7 +453,7 @@ test('14.4.6 approve_spin (prêmio coins): entry 0/+50, última tentativa esgota
 
   // fila encerrada: não gira mais nem volta a ser liberada
   await expectError(t.rpc(memberA, 'spin_wheel', { p_queue_id: manualQueueId }), 'NO_ACTIVE_TURN')
-  // SQL fixer r1: entrada já `done` → QUEUE_NOT_WAITING (§7.6 passo 5 lista o status antes das tentativas;
+  // Nota de implementação: entrada já `done` → QUEUE_NOT_WAITING (§7.6 passo 5 lista o status antes das tentativas;
   // ATTEMPTS_EXHAUSTED só vale para entrada ainda `waiting` com tentativas esgotadas — coberto em views.test "release_turn").
   await expectError(t.rpcRow(admin, 'release_turn', { p_queue_id: manualQueueId }), 'QUEUE_NOT_WAITING')
   // histórico: 1 rejeitado + 2 aprovados

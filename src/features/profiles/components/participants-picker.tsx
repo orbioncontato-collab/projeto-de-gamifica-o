@@ -12,7 +12,7 @@ export interface ParticipantsPickerProps {
   disabled?: boolean
 }
 
-/** `PersonPicker` múltiplo (compartilhado por Missões e Desafios — promovido de `features/missions`, handoff WP3): adiciona um colaborador por vez e lista os escolhidos como chips removíveis. */
+/** `PersonPicker` múltiplo (compartilhado por Missões e Desafios — promovido de `features/missions`,): adiciona um colaborador por vez e lista os escolhidos como chips removíveis. */
 export function ParticipantsPicker({ value, onChange, max, id, disabled }: ParticipantsPickerProps) {
   const profiles = useActiveProfiles()
   const byId = new Map((profiles.data ?? []).map((p) => [p.id, p]))

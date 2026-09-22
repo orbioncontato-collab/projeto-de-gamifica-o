@@ -1,6 +1,6 @@
 # FRONTEND-ARCH — Orbion Sales League (arquitetura do front)
 
-> Versão 1.0, 15/09/2026 — **revisão 1.1 (15/09/2026, tarde): aprovação de membros** (DATA-MODEL Apêndice B.21): colaborador que se cadastra com `team_code` nasce `pending`; `/inativo` vira `/aguardando` (pendente e inativo); Equipe ganha a seção "Pendentes" com Aprovar/Recusar e badge na sidebar; Configurações ganha o toggle de auto-aprovação (§2.1, §2.2, §3.3, §3.4, §3.6, §4.2–4.5, §4.8, §6, §7, §8.2, §9). Base de verdade para todos os agentes que implementarem a SPA. Entradas: `FEATURE-INVENTORY.md` (o que a UI faz), `DATA-MODEL.md` (o que o banco expõe — views, RPCs, enums, códigos de erro), `research/VERCEL-VITE-TANSTACK-2026.md`, `research/SUPABASE-2026.md` e o código Lovable atual em `src/` (identidade visual a preservar).
+> Versão 1.0, 15/09/2026 — **revisão 1.1 (15/09/2026, tarde): aprovação de membros** (DATA-MODEL Apêndice B.21): colaborador que se cadastra com `team_code` nasce `pending`; `/inativo` vira `/aguardando` (pendente e inativo); Equipe ganha a seção "Pendentes" com Aprovar/Recusar e badge na sidebar; Configurações ganha o toggle de auto-aprovação (§2.1, §2.2, §3.3, §3.4, §3.6, §4.2–4.5, §4.8, §6). Este documento é a referência de arquitetura do front: o inventário de telas por rota está em §2.2 e os contratos de dados em §4. O banco está em `DATA-MODEL.md` (views, RPCs, enums, códigos de erro).
 >
 > Decisões fechadas (não reabrir): Vite SPA sem SSR; remover TanStack Start/Nitro/`@lovable.dev/*`; single-tenant por instalação; 1º cadastro vira admin; colaboradores entram com `team_code`; **só admins registram atividades comerciais** (colaborador é somente leitura, exceto resgatar recompensa e editar nome/foto/cor/preferências); deploy na Vercel; Supabase = Postgres + Auth + Storage (sem Edge Functions).
 >
@@ -15,12 +15,10 @@
 3. Fluxo de autenticação e guardas
 4. Contratos compartilhados (client, tipos, chaves de query, hooks, realtime, toast, formatadores, componentes)
 5. Tema (tokens dark/light em `html[data-theme]`)
-6. Mapa de propriedade de arquivos — 9 pacotes de trabalho
-7. Definition of Done por pacote
+   *(as seções 6 e 7 eram o plano de execução interno da construção e saíram desta edição; a numeração das demais foi preservada)*
 8. Vercel, `vercel.json`, variáveis de ambiente, `.env.example`
 9. Estados vazios (banco sem dados)
 Apêndice A — identidade visual a preservar (paleta e padrões do protótipo original)
-Apêndice B — checklist de integração final
 
 ---
 
@@ -139,8 +137,8 @@ Gerenciador de pacotes: **npm** (apagar `bun.lock` e `bunfig.toml`; commitar `pa
 | deps `@tanstack/react-start`, `nitro`, `@lovable.dev/vite-tanstack-config`, `vite-tsconfig-paths`, `overrides.rolldown` | SSR/Start; alias `@/` passa a `resolve.alias` |
 | deps `@radix-ui/react-accordion, -aspect-ratio, -avatar, -collapsible, -context-menu, -hover-card, -menubar, -navigation-menu, -popover, -progress, -radio-group, -scroll-area, -slider, -toggle, -toggle-group`, `cmdk`, `vaul`, `embla-carousel-react`, `input-otp`, `react-day-picker`, `react-resizable-panels` | componentes shadcn não usados (§1.4). Datas usam `<input type="date">`/`datetime-local` nativos |
 | `src/start.ts`, `src/server.ts`, `src/router.tsx` (reescrito), `src/routes/index.tsx`, `src/routes/README.md`, `src/routeTree.gen.ts` (regenerado), `src/lib/error-capture.ts`, `src/lib/error-page.ts`, `src/lib/lovable-error-reporting.ts`, `src/styles.css` (substituído por `src/styles/*`) | Start/Lovable |
-| `src/gamification-app.tsx`, `src/gamification.css`, `src/wheel-*.tsx/.css`, `src/manager-*.tsx/.css`, `src/admin-*.tsx/.css`, `src/theme-controller.tsx`, `src/theme.css`, `src/hooks/use-mobile.tsx` | overlays com dados fictícios e `!important`. **Antes de apagar**, o WP0 copia para `docs/spec/legacy/` os trechos de CSS reaproveitados (roda, confete, pódio) — ver Apêndice A |
-| `.lovable/`, `AGENTS.md`, `bun.lock`, `bunfig.toml`, `components.json` (recriado), `README.md` (reescrito) | vestígios do protótipo/Bun |
+| `src/gamification-app.tsx`, `src/gamification.css`, `src/wheel-*.tsx/.css`, `src/manager-*.tsx/.css`, `src/admin-*.tsx/.css`, `src/theme-controller.tsx`, `src/theme.css`, `src/hooks/use-mobile.tsx` | overlays com dados fictícios e `!important`. os trechos de CSS reaproveitados (roda, confete, pódio) foram preservados no design system — ver Apêndice A |
+| `.lovable/`, `bun.lock`, `bunfig.toml`, `components.json` (recriado), `README.md` (reescrito) | vestígios do protótipo/Bun |
 | `eslint.config.js` regra `no-restricted-imports: server-only` e ignores `.output/.vinxi` | Start |
 
 ### 1.4 shadcn/ui — componentes mantidos (11) e apagados (39)
@@ -575,7 +573,7 @@ export const FOOTER_NAV = [{ to: '/configuracoes', label: 'Configurações', ico
 
 ---
 
-## 4. Contratos compartilhados (todo agente de feature codifica contra isto)
+## 4. Contratos compartilhados (toda tela de feature codifica contra isto)
 
 ### 4.1 `src/lib/supabase.ts` — client singleton
 
@@ -1268,96 +1266,6 @@ Classes de identidade (usadas pelos componentes de `components/shared`, não dir
 
 ---
 
-## 6. Mapa de propriedade de arquivos — 9 pacotes de trabalho
-
-Ordem de execução: **Onda 0** = WP0 (bloqueia tudo). **Onda 1** = WP1 e WP8 em paralelo (WP8 só toca estilos/compartilhados). **Onda 2** = WP2, WP3, WP4, WP5, WP6, WP7 em paralelo. **Onda 3** = integração (Apêndice B; sem pacote — o orquestrador roda `npm run build && npm run lint && npm test` e a checklist).
-
-Regra de ouro: cada arquivo tem **um** dono. Um pacote que precise de mudança em arquivo alheio registra a necessidade em `docs/spec/handoffs/<wpN>.md` (uma linha: arquivo, mudança, motivo) em vez de editar. Arquivos "gerados" (`routeTree.gen.ts`, `package-lock.json`) não são de ninguém: nunca editar à mão; regenerar.
-
-### WP0 — Fundação e design system (onda 0)
-**Cria/possui:** `package.json`, `package-lock.json`, `index.html`, `vite.config.ts`, `vitest.config.ts`, `tsconfig.json`, `tsconfig.node.json`, `eslint.config.js`, `.prettierrc`, `.prettierignore`, `.gitignore`, `.env.example`, `vercel.json`, `README.md`, `components.json`, `src/main.tsx`, `src/router.tsx`, `src/vite-env.d.ts`, `src/routes/__root.tsx`, **stubs** de todas as rotas listadas em §2.2 (cada uma renderiza `<PageFrame>` + `<EmptyState>` "Em construção"; a partir da onda 1 cada arquivo de rota pertence ao pacote indicado no resumo abaixo, e o WP0 não volta a tocá-los), `src/lib/**` (todos os 11 arquivos), `src/features/profiles/**` (inclusive `getAchievementBoard`/`useAchievementBoard`, promovidos para atender Perfil e Conquistas, e `getPendingMembers`/`usePendingMembers`, para Equipe), `src/features/auth/bootstrap-query.ts` (`getBootstrap` com a retentativa de `updateUser({ team_code: null })`, `bootstrapQueryOptions`, `useBootstrap`, `useMe`), `src/features/auth/auth-provider.tsx` (`AuthState`, `AuthProvider`, `useAuth`), `src/features/theme/**` (versão funcional), `src/components/ui/**` (11 mantidos, restilizados), `src/components/shared/**` (inclusive `achievements-mini-grid.tsx`), `src/styles/**`, `src/test/**`, `docs/spec/legacy/**` (CSS do Lovable arquivado), remoção de tudo listado em §1.3.
-**Não toca:** nada de `features/*` além dos citados; nenhum componente de página.
-**Entrega:** `npm run build`, `lint`, `test` verdes; app sobe em `/login` com tela de login stub; `/dev/showcase` mostra todos os compartilhados nos dois temas.
-
-### WP1 — Layout, autenticação e notificações (onda 1)
-**Possui:** `src/features/auth/**` exceto `auth-provider.tsx` e `bootstrap-query.ts` (WP0 continua dono; mudanças neles vão para `handoffs/wp1.md`), `src/features/notifications/**`, `src/components/layout/**`, `src/routes/login.tsx`, `src/routes/signup.tsx`, `src/routes/aguardando.tsx`, `src/routes/_app.tsx`, `src/routes/_app/_admin.tsx`.
-**Não toca:** `lib/**`, `components/shared/**`, `styles/**`, demais rotas/features.
-**Entrega:** fluxo completo §3 (primeiro admin, colaborador com código → `SignupSuccess` explicando a aprovação → `/aguardando` com "Verificar novamente", e-mail duplicado, senha errada, perfil inativo em `/aguardando`, logout), sidebar por papel com badge "Pendentes" no item Equipe (`bootstrap.pending_members`), topbar (temporada, moedas, sino com realtime, tema, menu do usuário), bottom nav, drawer mobile.
-
-### WP2 — Visão geral (colaborador e gestor), Ranking e Perfil (onda 2)
-**Possui:** `src/features/dashboard/**`, `src/features/ranking/**`, `src/features/profile/**`, `src/routes/_app/index.tsx`, `src/routes/_app/ranking.tsx`, `src/routes/_app/perfil.tsx`.
-**Não toca:** `features/team/**` (modal de colaborador é do WP6: o botão "Ver desempenho" navega para `/admin/equipe?perfil=<id>`), `features/auth/**` (usa `useUpdateMyProfile`/`useUploadMyAvatar` prontos), `features/achievements/**` (o mini-grid do Perfil é `AchievementsMiniGrid` de `components/shared`, alimentado por `useAchievementBoard` de `features/profiles`).
-**Entrega:** Dashboard §2 completo (LevelHero, 4 StatCards, SalesTarget com projeção, NextReward B.6, RankingPreview, EventBanner com contador, MissionPreview, ActivityFeed com realtime e paginação; `useDashboard` desabilitado sem temporada → estado "Sem temporada ativa"), ManagerOverview §2b (4 métricas, tabela de desempenho, Top 3, Saúde comercial), Ranking §3 (pódio com alturas/medalhas/glow, lista com "Você" e gap), Perfil §9 (stats, mini-grid de conquistas via `AchievementsMiniGrid`, editar nome/cor/foto com limpeza da pasta de avatares antes do upload e botão "Limpar fotos antigas" no 403).
-
-### WP3 — Missões e Desafios (onda 2)
-**Possui:** `src/features/missions/**`, `src/features/challenges/**`, `src/routes/_app/missoes.tsx`, `src/routes/_app/desafios.tsx`.
-**Entrega:** filtros por search param, LightningMission com contador (`seconds_remaining`), cards com progresso/concluída, editor de missão (admin; participantes com `PersonPicker` múltiplo; janela validada contra a temporada no cliente antes de enviar), lista admin com excluir; DuelCard (barra proporcional, VS, prêmio, "finaliza em N dias"), TeamChallenge (meta/realizado/%/prêmio coletivo), ChallengesManager (lista com status, editor só em `draft`, ações ativar/finalizar/cancelar com `ConfirmDialog`).
-
-### WP4 — Roleta: tela do colaborador, fila do gestor, RPC de giro, editor de prêmios (onda 2)
-**Possui:** `src/features/wheel/**` (inclusive `wheel.css`), `src/routes/_app/roleta.tsx`, `src/routes/_app/_admin/admin/roleta.tsx`.
-**Entrega:** seletor Clássica/Premium (bloqueado na roleta da vez ativa), roda com `conic-gradient` gerado dos prêmios (`color` ou paleta), rótulo por setor, ponteiro, centro, animação 8,2 s parando no `sector_index` do retorno, confete, `SpinResultDialog` (prêmio, modo, tipo, Mystery Box → prêmio resolvido, botões Aprovar/Fechar sem aprovar para admin; "Concluir giro livre"), status "GIRO LIVRE / VEZ DE / AGUARDANDO APROVAÇÃO", botão de giro por estado (admin ou dono da vez pode girar; demais veem "Aguardando liberação"), `QueueQuickPanel` (acima) e `QueuePanel` (abaixo, com busca, adicionar colaborador/convidado, roleta, tentativas com cadeado até 20, liberar/liberado, remover, "N restantes"), histórico "Últimas aprovações", realtime (outras telas animam no INSERT de `wheel_spins`; refetch de prêmios se `prizes_hash` mudou), editor de prêmios em `/admin/roleta` (label, tipo, valor, peso, cor, ordem, ativo; mín. 2; erro `SPIN_PENDING`).
-
-### WP5 — Recompensas e Conquistas (onda 2)
-**Possui:** `src/features/rewards/**`, `src/features/achievements/**`, `src/routes/_app/recompensas.tsx`, `src/routes/_app/conquistas.tsx`, `src/routes/_app/_admin/admin/recompensas.tsx`.
-**Entrega:** carteira (saldo; as 3 métricas de origem **fixas** do original — "+Venda" = `v_wallet.coins_from_sales`, "+Missão" = `coins_from_missions`, "+Meta" = `coins_from_goals`, no mesmo layout; as demais origens (`coins_from_wheel`, `coins_from_challenges`, `coins_from_achievements`, `coins_from_manual`) ficam em tooltip/lista secundária "Outras origens"; últimos 3 créditos com título `reason ?? rule.name ?? ENTRY_SOURCE_LABELS[source]`), conquistas consumindo `useAchievementBoard` de `features/profiles`, loja (Resgatar/Faltam N moedas, estoque, confirmação), "Meus pedidos" (status/notas), admin: catálogo CRUD (nome, categoria, valor, custo, estoque, ícone, ativo) e fila de pedidos (aprovar/entregar/cancelar com notas); conquistas grid (desbloqueada/bloqueada, ✨, `unlocked_count`), contador "N de M".
-
-### WP6 — Dashboard administrativo e Equipe (onda 2)
-**Possui:** `src/features/admin-dashboard/**`, `src/features/team/**`, `src/routes/_app/_admin/admin/index.tsx`, `src/routes/_app/_admin/admin/equipe.tsx`.
-**Entrega:** botões de atalho (Criar missão → `/missoes?novo=true`; Criar desafio → `/desafios?novo=true`; Gerenciar equipe → `/admin/equipe`), 6 métricas, 3 gráficos recharts 3 (área acumulada, barras por colaborador, linha de pontos) com `chart-theme.ts` reagindo ao tema, indicadores (conversão, comparecimento, CRM, atividades vs metas de `app_settings`), barra operacional (Cadastrar colaborador → `/admin/equipe?convidar=true`, que abre o `InviteDialog` "Como adicionar colaboradores" com o `team_code` lido por `useTeamCode()` (`features/team`), mascarado com `maskTeamCode`, botão copiar e o link `/signup` — contas nascem só pelo cadastro com código; Lançar pontos → `/admin/pontuacao?aba=lancar`; Histórico → `/admin/pontuacao?aba=historico`; contadores colaboradores/pontos/lançamentos), Equipe: tabela/cards, busca, `CollaboratorDetailDialog` (`?perfil=`), `CollaboratorEditorDialog` (`?editar=`; foto ≤ 1,5 MB com `cleanupAvatarFolder` antes do upload e botão "Limpar fotos antigas" no 403, nome, e-mail, cargo, status, equipe, telefone, meta individual, papel; nível somente leitura — o save do formulário **nunca** lança pontos), **pontos iniciais** como ação separada no mesmo diálogo (`InitialPointsCard`: mostra "Pontos iniciais lançados: N" via `useInitialPointsSum`; campo + botão próprio "Lançar pontos iniciais" → `useRecordInitialPoints`; `INITIAL_POINTS_EXISTS` desabilita o botão com a mensagem do catálogo; `NO_SEASON_FOR_DATE` orienta a ativar a temporada), inativar/reativar com `LAST_ADMIN` tratado; **seção "Pendentes"** (`PendingMembersSection`, acima da tabela, visível só quando `usePendingMembers()` devolve ≥ 1 ou `?pendentes=true`): cabeçalho "Cadastros aguardando aprovação ({n})", linha por pedido (avatar, nome, e-mail de `profile_private`, "pediu há {relativo}"), botões "Aprovar" (`useApproveMember`) e "Recusar" (`useRejectMember` com `ConfirmDialog`), `EmptyState` "Nenhum cadastro aguardando" quando aberta por `?pendentes=true` sem pendentes; a tabela principal mostra pendentes/inativos com `StatusPill` (`PROFILE_STATUS_LABELS`) e o editor de colaborador desabilita "Lançar pontos iniciais" para `status !== 'active'` (o banco devolveria `PROFILE_INACTIVE`).
-
-### WP7 — Pontuação, Configurações (pessoais e da plataforma) e Guia (onda 2)
-**Possui:** `src/features/points/**`, `src/features/settings/**`, `src/features/guide/**`, `src/routes/_app/configuracoes.tsx`, `src/routes/_app/_admin/admin/pontuacao.tsx`, `src/routes/_app/_admin/admin/configuracoes.tsx`, `src/routes/_app/_admin/admin/guia.tsx`.
-**Entrega:** regras (lista com ativa/inativa, pontos, moedas, métrica, tipo; editor; nova; excluir soft), lançar por regra (colaborador com saldo atual, regra manual, quantidade, valor R$ quando `requires_amount`, data/hora ≤ 90 dias, motivo) e manual (±pontos, motivo, moedas opcionais), histórico paginado com estorno (`ConfirmDialog` + motivo), preferências pessoais (notificações, alertas de evento), plataforma — aba geral (`company-form.tsx`): empresa, XP por nível, metas de indicadores, toggle "Gestores participam do ranking" (`rank_admins`), fuso (campo desabilitado quando `v_admin_kpis.entries_count > 0` ou após erro `TIMEZONE_LOCKED`, com hint "Trava após o primeiro lançamento"); temporadas (`season-panel.tsx`: lista, criar, editar; botão "Ativar" desabilitado com tooltip "Começa em DD/MM" enquanto `starts_at > now` e `SEASON_NOT_STARTED` tratado se escapar; `close-season-dialog.tsx`: encerrar com resumo `CloseSeasonPayload` e, se `warnings` contém `gap_until_next_season`, oferta "Antecipar início da próxima para {todayLocal+1}" → `useUpdateSeason(next_season_id, { starts_on: todayLocal(tz) + 1 dia })`; alerta quando `season.ends_at < now`), eventos especiais (criar/editar via `save_special_event`, desativar via soft delete; `EVENT_OVERLAP`/`EVENT_RANGE_INVALID` pelo catálogo), código da equipe (mostrar mascarado, copiar, gerar novo; lembrete "Todos já entraram? Gere um novo código" — DATA-MODEL §14.1 passo 7), **aprovação de membros** (`member-approval-card.tsx`, na mesma aba `codigo`: `Switch` "Aprovar novos membros automaticamente" ligado a `app_settings.auto_approve_members` via `useUpdateAppSettings`; texto de ajuda "Desligado (recomendado): cada cadastro com o código fica em Equipe › Pendentes até um gestor aprovar. Ligado: quem tiver o código entra na hora — use só com confirmação de e-mail ativa."; a mudança vale só para cadastros futuros, DATA-MODEL Apêndice B.21), manutenção (`recompute_stats`); guia com os 9 passos do Apêndice C do DATA-MODEL + checklist.
-
-**Notas de implementação (integração onda 3):** a checklist embutida em Configurações › Geral (`setup-checklist.tsx`) é uma versão derivada do estado (temporada ativa, meta, pendentes, próxima temporada) com link para o guia completo; a lista estática de 9 itens vive só em `features/guide/guide-steps.ts` porque `features/settings` não pode importar de `features/guide` (§2.3). A trava do fuso usa `v_point_entries_history` (`count: exact, head: true`, chave `qk.ledger.hasEntries()`) em vez de `v_admin_kpis.entries_count`: o KPI é por temporada e `TIMEZONE_LOCKED` vale para qualquer lançamento em qualquer temporada (DATA-MODEL §7.2).
-
-### WP8 — Tema claro, polimento dos compartilhados, acessibilidade e responsivo (onda 1, continua na onda 3)
-**Possui (herda do WP0):** `src/styles/**`, `src/components/shared/**`, `src/components/ui/**`, `src/features/theme/**`, `public/fonts/**` (se adotar fonte), `src/components/shared/__demo__/**`.
-**Não pode:** mudar **props** de componente compartilhado (só internos/estilo); tocar features ou rotas. Reporta problemas visuais das features em `docs/spec/handoffs/wp8.md`.
-**Entrega:** light theme completo e AA (texto 4.5:1), foco visível, `prefers-reduced-motion`, 320/375/768/1024/1440 sem overflow horizontal, `Sheet`/`Dialog` com foco preso, toast acima do bottom nav, capturas dos dois temas em `docs/spec/qa/`.
-
-### Resumo (arquivo → dono)
-
-| Caminho | Dono |
-|---|---|
-| raiz (`package.json`, configs, `index.html`, `vercel.json`, `.env.example`) | WP0 |
-| `src/main.tsx`, `src/router.tsx`, `src/routes/__root.tsx`, `src/lib/**`, `src/features/profiles/**`, `src/test/**` | WP0 |
-| `src/styles/**`, `src/components/shared/**` (inclusive `achievements-mini-grid.tsx`), `src/components/ui/**`, `src/features/theme/**` | WP0 cria → WP8 mantém |
-| `src/features/auth/**`, `src/features/notifications/**`, `src/components/layout/**` (resto), `routes/login|signup|aguardando|_app|_app/_admin` | WP1 |
-| `src/features/dashboard|ranking|profile/**`, `routes/_app/index|ranking|perfil` | WP2 |
-| `src/features/missions|challenges/**`, `routes/_app/missoes|desafios` | WP3 |
-| `src/features/wheel/**`, `routes/_app/roleta`, `routes/_app/_admin/admin/roleta` | WP4 |
-| `src/features/rewards|achievements/**`, `routes/_app/recompensas|conquistas`, `routes/_app/_admin/admin/recompensas` | WP5 |
-| `src/features/admin-dashboard|team/**`, `routes/_app/_admin/admin/index|equipe` | WP6 |
-| `src/features/points|settings|guide/**`, `routes/_app/configuracoes`, `routes/_app/_admin/admin/pontuacao|configuracoes|guia` | WP7 |
-
----
-
-## 7. Definition of Done por pacote
-
-Comum a todos (bloqueante):
-1. `npm run typecheck`, `npm run lint`, `npm test`, `npm run build` verdes; nenhum `any`, nenhum `// @ts-ignore`, nenhum `console.log`.
-2. Toda query renderiza os 4 estados: **carregando** (skeleton com a mesma altura do conteúdo), **erro** (`ErrorState` com "Tentar novamente"), **vazio** (`EmptyState` de §9 com orientação ao gestor) e **dados**. Toda mutation: botão com `loading`, toast de sucesso, toast de erro com mensagem do catálogo, botão desabilitado durante o envio (sem duplo clique).
-3. Funciona com o banco **recém-instalado** (seed de catálogo, zero pessoas, zero lançamentos): nada quebra, nenhum `undefined` na tela, nenhum `NaN`, nenhum "R$ NaN", nenhuma divisão por zero.
-4. Larguras 375, 768, 1024 e 1440 sem scroll horizontal; alvos de toque ≥ 44 px; bottom nav não cobre conteúdo (`pb-28` no `main` em mobile).
-5. Dark e light corretos (nenhum hex, só tokens). Ícones decorativos `aria-hidden`; botões só-ícone com `aria-label`; modais com título; formulários com `label`.
-6. Texto 100 % pt-BR; números/moeda/datas pelos formatadores de `lib/format.ts` (proibido `toLocaleString` direto).
-7. Nenhum dado fictício, nenhum `localStorage` fora de `features/theme`, nenhuma chamada supabase fora de `api.ts`/`lib`.
-8. Testes: `lib/**` ≥ 80 % (WP0); demais pacotes testam funções puras dos próprios `api.ts`/`schemas.ts`/engines e pelo menos 1 teste de renderização por página com `renderWithProviders` e supabase mockado (estados vazio + com dados).
-
-Específico:
-
-| WP | Critérios adicionais |
-|---|---|
-| WP0 | `/dev/showcase` exibe todos os compartilhados; `database.types.test.ts` compila (com `profile_status = 'pending'`, `BootstrapPayload.pending_members`, `PendingMember`); `usePendingMembers` testado com supabase mockado (lista vazia e com 2 pedidos); `spin-engine`, `format`, `gamification`, `rpc-errors` ≥ 90 %; `README.md` reescrito com setup local (`.env.local`), scripts e deploy; app sem env mostra `ConfigMissingScreen` |
-| WP1 | Primeiro cadastro cria admin e cai em `/`; segundo cadastro sem código falha com mensagem certa; código inválido (`false`) bloqueia antes do `signUp`; `validate_team_code` falhando por rede **não** bloqueia o `signUp` e `Database error saving new user` vira "Não foi possível concluir o cadastro. Verifique o código."; `data.session === null` mostra `SignupSuccess` "Confirme seu e-mail" com a frase sobre a aprovação; cadastro com código **e** sessão cai em `/aguardando` com "Seu cadastro está aguardando aprovação do gestor" e "Verificar novamente" leva a `/` depois que o bootstrap devolve `active`; `updateUser({ team_code: null })` chamado após o cadastro; `PROFILE_NOT_FOUND` no bootstrap faz `signOut()` com "Cadastro incompleto"; sessão persiste após reload; logout limpa cache; perfil inativado cai em `/aguardando` com "Seu acesso foi desativado"; badge "Pendentes" aparece no item Equipe da sidebar só para admin e só quando `pending_members > 0`; colaborador não vê "Administração" e é redirecionado de `/admin/*`; sino atualiza via realtime; drawer fecha ao navegar |
-| WP2 | Sem temporada ativa: `useDashboard` não consulta e o dashboard mostra estado "Sem temporada ativa" (§9) em vez de zeros; upload de foto no Perfil lista e limpa a pasta `avatars/<me.id>` antes de subir, remove a foto anterior após gravar e trata 403 com "Limpe fotos antigas e tente de novo" + botão que executa a limpeza; mini-grid do Perfil usa `AchievementsMiniGrid` (nenhum import de `features/achievements`); ranking com 1 pessoa mostra pódio parcial (2º/3º vazios "aguardando"); "Você" destacado; gap "líder" quando `gap_to_above` null; feed pagina por cursor; contador do evento zera e some; projeção de meta usa `goalProjection` |
-| WP3 | Missão diária concluída ontem aparece zerada hoje (`period_key`); relâmpago some após `ends_at`; editor impede janela fora da temporada e relâmpago > 24 h antes de enviar; `MISSION_HAS_PROGRESS` exibido; duelo exige 2 participantes; coletivo sem participantes = todos |
-| WP4 | Roda para no setor certo em 100 giros de teste (`spin-engine.test.ts`); duas abas: giro em uma anima na outra; `SPIN_PENDING` bloqueia liberar/editar; convidado pode ser aprovado; `extra_spin` aumenta tentativas; ao esgotar sai da fila; free spin não altera fila nem saldo; editor recusa < 2 prêmios; roleta re-renderiza ao salvar prêmios |
-| WP5 | Saldo atualiza no chip imediatamente após resgate; `INSUFFICIENT_COINS`/`OUT_OF_STOCK` mostrados; cancelamento devolve moedas na UI; conquista repetível mostra `unlocked_count`; carteira mostra +Venda/+Missão/+Meta de `coins_from_sales`/`coins_from_missions`/`coins_from_goals` (fixas); último crédito de regra sem `reason` mostra o nome da regra (embed `point_rules(name)`) |
-| WP6 | Gráficos com 0 pontos mostram estado vazio (não gráfico em branco); gráficos recoloridos ao trocar tema; `LAST_ADMIN` e `EMAIL_TAKEN` tratados; upload > 1,5 MB ou SVG bloqueado antes do envio; upload do admin limpa a pasta `avatars/<profileId>` antes de subir, remove a anterior após gravar e trata 403 com "Limpe fotos antigas e tente de novo" + botão de limpeza; salvar o formulário do colaborador não cria lançamento; "Lançar pontos iniciais" cria entry `system` e a segunda tentativa mostra `INITIAL_POINTS_EXISTS`; "Pontos iniciais lançados: N" reflete a soma; `?convidar=true` abre o modal com o código mascarado sem importar de `features/settings`; `?perfil=` abre o modal por URL; seção "Pendentes" lista os cadastros `pending` (nome, e-mail, data) mesmo **sem temporada ativa**, "Aprovar" chama `admin_update_profile({status:'active'})` e some da lista com toast, "Recusar" pede confirmação e chama `{status:'inactive'}`; ambos invalidam bootstrap (badge some) e `admin` (`pending_count`); `?pendentes=true` rola até a seção; pendente aparece na tabela com pílula "Pendente" e sem ações de pontos |
-| WP7 | Lançar por regra exige valor quando `requires_amount`; data futura > 5 min bloqueada; `MILESTONE_ALREADY_AWARDED` mostrado; estorno aparece no histórico como `is_reversed`; encerrar temporada mostra resumo com campeão e, com `gap_until_next_season`, o botão "Antecipar início da próxima" chama `update_season`; "Ativar" fica desabilitado com tooltip "Começa em DD/MM" para temporada futura e `SEASON_NOT_STARTED` é exibido pelo catálogo; alerta "temporada terminou — crie/ative a próxima" quando `ends_at < now`; evento sobreposto mostra `EVENT_OVERLAP` do catálogo (nunca `23P01`) e `EVENT_RANGE_INVALID` para fim ≤ início; fuso desabilitado após o primeiro lançamento e `TIMEZONE_LOCKED` exibido; toggle `rank_admins` salva por `update_app_settings` e o ranking reflete após invalidar bootstrap/profiles; toggle "Aprovar novos membros automaticamente" salva `auto_approve_members` por `update_app_settings`, mostra o aviso sobre confirmação de e-mail e reflete em `useAppSettings` após invalidar; código da equipe copia para a área de transferência |
-| WP8 | Contraste AA em ambos os temas (relatório axe sem violações críticas); `Tab` percorre sidebar → topbar → conteúdo; `Esc` fecha modais/drawer; capturas em `docs/spec/qa/{dark,light}/*.png` para as 18 rotas |
 
 ---
 
@@ -1409,7 +1317,7 @@ Supabase (Authentication → Providers → Email e Authentication → Emails →
 
 ### 8.3 `.env.example`
 ```dotenv
-# Copie para .env.local (ignorado pelo git). Só variáveis VITE_* chegam ao navegador.
+# Copie para .env (ignorado pelo git). Só variáveis VITE_* chegam ao navegador.
 VITE_SUPABASE_URL=https://SEU-PROJECT-REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxx
 # Opcional
@@ -1466,15 +1374,4 @@ Contexto: o seed cria só catálogo (temporada do mês com meta 0, 10 regras —
 - Toast: pílula `#0D1B2A` com borda verde `20 %`, ícone check verde, centralizada embaixo (acima do bottom nav no mobile).
 - Light: fundo `#F4F7FB`, cards `#fff` com borda `#DFE7F0`, texto `#0F172A`, verde escurecido `#00B86B` para contraste.
 
-Os arquivos originais ficam arquivados em `docs/spec/legacy/` (`gamification.css`, `wheel-experience.css`, `theme.css`) para consulta de valores; nada deles é importado pelo app.
-
-## Apêndice B — checklist de integração final (onda 3)
-
-1. `git merge` dos 9 pacotes sem conflito (ownership respeitada); `handoffs/*.md` resolvidos ou convertidos em issues.
-2. `npm ci && npm run lint && npm run typecheck && npm test && npm run build` — build < 60 s, `dist/assets/index-*.js` gzip < 300 kB (recharts em chunk próprio da rota `/admin`).
-3. Banco recém-instalado: percorrer as 18 rotas como admin recém-cadastrado e como colaborador (segundo cadastro com código) — nenhuma tela quebra, nenhuma requisição 4xx inesperada no Network.
-4. Fluxos ponta a ponta (DATA-MODEL §14): 14.1 cadastro → `/aguardando` → gestor vê badge e aprova em Equipe › Pendentes → "Verificar novamente" entra no app (e o caminho "Recusar"; e com `auto_approve_members` ligado entra direto); 14.2 venda + estorno; 14.3 missão relâmpago → fila; 14.4 liberar → girar (em duas abas) → aprovar / rejeitar / convidado / giro livre; 14.5 resgate → aprovar → entregar / cancelar; 14.7 evento (criado por `save_special_event`; sobreposição → `EVENT_OVERLAP`; banner upcoming → live → some; multiplicador visível no histórico "100 × 2"); 14.8 criar → encerrar (com aviso `gap_until_next_season` e antecipação) → ativar temporada (só a partir de `starts_at`); 14.1 passo 7 pontos iniciais (`record_initial_points`, segunda vez → `INITIAL_POINTS_EXISTS`).
-5. Realtime: notificação chega sem reload; fila e roleta sincronizam entre duas sessões; feed atualiza o dashboard do colaborador quando o gestor lança.
-6. Tema: alternar em cada rota, recarregar (persistiu), abrir em aba nova (sincronizou).
-7. Mobile (375): drawer, bottom nav, roda 350 px, modais roláveis, tabelas em cards.
-8. Deploy Preview na Vercel com env de staging; deep link `/admin/equipe?perfil=<id>` recarregado funciona; `robots.txt` `Disallow: /`.
+Os valores reaproveitados do protótipo original (roda, confete, pódio) já estão nos tokens e nos estilos do design system; nenhum arquivo do protótipo é importado pelo app.

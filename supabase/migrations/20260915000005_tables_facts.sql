@@ -36,7 +36,7 @@ create table if not exists public.point_entries (
   constraint point_entries_multiplier_ck check (multiplier = 1 or source = 'rule')
 );
 
--- DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce com source = 'system' (§7.4) e herda rule_id
+-- Nota de implementação: estorno de rule/manual/system nasce com source = 'system' (§7.4) e herda rule_id
 -- (§6.6 passo 2); um estorno de regra 0/0 também precisa passar. Reaplicação em banco existente: troca os dois CKs.
 alter table public.point_entries drop constraint if exists point_entries_rule_only_ck;
 alter table public.point_entries add constraint point_entries_rule_only_ck check (source in ('rule') or rule_id is null or reverses_entry_id is not null);

@@ -23,7 +23,7 @@ import type {
 // ---------------------------------------------------------------------------
 
 type NoRel = []
-/** Tabelas escritas só por RPC (`never` quebrava a inferência do builder em `select(colunas)` — handoff WP6). */
+/** Tabelas escritas só por RPC (`never` quebrava a inferência do builder em `select(colunas)`). */
 type RpcOnly = Record<string, never>
 type Rel<T extends readonly unknown[]> = T
 

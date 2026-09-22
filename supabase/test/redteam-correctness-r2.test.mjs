@@ -193,7 +193,7 @@ test('streak: system/negativo não contam; view zera quando streak_last_day < ho
 test('§7.4: estorno de entry rule/manual/system nasce com source = system (não herda a source da original); v_admin_kpis.entries_count não conta estornos', async () => {
   assert.equal(revOfRuleA.source, 'system', "reverse_entry: source = case when orig.source in ('rule','manual','system') then 'system' else orig.source end")
   // consequência: entries_count (§5.4) = count(source in ('rule','manual')) não deve contar a linha de estorno
-  // SQL fixer r2 (test-uncertain): §5.4 filtra `where (select public.is_admin())` dentro da view — sem sessão de
+  // Nota de implementação: §5.4 filtra `where (select public.is_admin())` dentro da view — sem sessão de
   // gestor (t.sql roda como postgres, auth.uid() nulo) a view devolve zero linhas; consultar como admin.
   const kpi = await t.asUser(admin, async (tx) => (await tx.query('select * from public.v_admin_kpis where season_id = $1', [activeSeason.id])).rows[0])
   const expected = await countRows("select 1 from public.point_entries where season_id = $1 and source in ('rule','manual') and reverses_entry_id is null", [activeSeason.id])

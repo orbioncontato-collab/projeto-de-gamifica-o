@@ -82,7 +82,7 @@ export async function getCollaboratorDashboard(
   return data as DashboardPayload
 }
 
-/** Mesma regra do perfil próprio (MIME + 1,5 MB), agora reexportada por `features/auth/api` (handoff WP6). */
+/** Mesma regra do perfil próprio (MIME + 1,5 MB), agora reexportada por `features/auth/api` (). */
 export const assertAdminAvatarFile = assertAvatarFile
 
 const isQuotaError = (error: { message: string; statusCode?: string | number }): boolean =>

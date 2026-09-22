@@ -3,7 +3,7 @@ import { useBranding } from '@/features/branding/hooks'
 import { BrandMark } from './brand-mark'
 
 /**
- * Logo da instalação (FEATURE-INVENTORY §1): tile com o símbolo (ou a logo enviada em
+ * Logo da instalação: tile com o símbolo (ou a logo enviada em
  * Configurações → Marca) + nome da empresa + nome da plataforma. Tudo vem de `get_branding`.
  */
 export function Brand({ className, compact = false }: { className?: string; compact?: boolean }) {

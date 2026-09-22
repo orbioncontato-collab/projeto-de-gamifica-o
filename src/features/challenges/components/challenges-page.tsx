@@ -24,7 +24,7 @@ export interface ChallengesPageProps {
 
 const BOARD_STATUSES = ['active', 'finished'] as const
 
-/** Desafios (FEATURE-INVENTORY §5): duelos e coletivos em andamento, encerrados, e gestão para o admin. */
+/** Desafios: duelos e coletivos em andamento, encerrados, e gestão para o admin. */
 export function ChallengesPage({ openNew, manage }: ChallengesPageProps) {
   const { isAdmin, seasonId, season } = useMe()
   const navigate = useNavigate()

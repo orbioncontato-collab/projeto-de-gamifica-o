@@ -127,7 +127,7 @@ begin
     NEW.base_points := -v_orig.base_points;
     NEW.multiplier := 1;
     NEW.rule_id := v_orig.rule_id;
-    -- §7.4 / DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce 'system'; demais sources herdam
+    -- §7.4 / Nota de implementação: estorno de rule/manual/system nasce 'system'; demais sources herdam
     NEW.source := case when v_orig.source in ('rule', 'manual', 'system') then 'system'::public.entry_source else v_orig.source end;
     NEW.special_event_id := null;
     NEW.boost_id := null;
@@ -341,7 +341,7 @@ begin
     end if;
   elsif v_is_reversal and v_orig_counts then
     perform private.recompute_streak(NEW.profile_id);
-    -- DECISIONS.md (SQL fixer r2): a original deixa de contar como atividade (§4.8) — last_entry_at da temporada
+    -- Nota de implementação: a original deixa de contar como atividade (§4.8) — last_entry_at da temporada
     -- é recalculado do ledger para reproduzir recompute_stats (§7.2); greatest() sozinho manteria a data estornada.
     update public.profile_season_stats ss
        set last_entry_at = (select max(e.occurred_at) from public.point_entries e

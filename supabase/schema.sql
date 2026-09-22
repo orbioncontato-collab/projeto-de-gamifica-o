@@ -35,7 +35,7 @@
 --   12. 20260915000012_storage_realtime.sql
 --   13. 20260915000013_seed.sql
 --   14. 20260921000014_branding.sql
--- Gerado em: 2026-09-21T19:06:25.824Z
+-- Gerado em: 2026-09-22T19:17:13.900Z
 -- =============================================================================
 
 begin;
@@ -559,7 +559,7 @@ create table if not exists public.point_entries (
   constraint point_entries_multiplier_ck check (multiplier = 1 or source = 'rule')
 );
 
--- DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce com source = 'system' (§7.4) e herda rule_id
+-- Nota de implementação: estorno de rule/manual/system nasce com source = 'system' (§7.4) e herda rule_id
 -- (§6.6 passo 2); um estorno de regra 0/0 também precisa passar. Reaplicação em banco existente: troca os dois CKs.
 alter table public.point_entries drop constraint if exists point_entries_rule_only_ck;
 alter table public.point_entries add constraint point_entries_rule_only_ck check (source in ('rule') or rule_id is null or reverses_entry_id is not null);
@@ -1102,7 +1102,7 @@ begin
 end $$;
 
 -- Delta que uma entry soma num desafio (§4.18); 0 se não se aplica.
--- DECISIONS.md (SQL fixer r2): stable (não immutable) — para métrica 'activities' o estorno (source 'system', §7.4)
+-- Nota de implementação: stable (não immutable) — para métrica 'activities' o estorno (source 'system', §7.4)
 -- precisa olhar a source da original para decrementar o que ela somou.
 create or replace function private.challenge_value(p_metric public.challenge_metric, p_entry public.point_entries)
 returns numeric language plpgsql stable security definer set search_path = ''
@@ -1421,7 +1421,7 @@ begin
     NEW.base_points := -v_orig.base_points;
     NEW.multiplier := 1;
     NEW.rule_id := v_orig.rule_id;
-    -- §7.4 / DECISIONS.md (SQL fixer r2): estorno de rule/manual/system nasce 'system'; demais sources herdam
+    -- §7.4 / Nota de implementação: estorno de rule/manual/system nasce 'system'; demais sources herdam
     NEW.source := case when v_orig.source in ('rule', 'manual', 'system') then 'system'::public.entry_source else v_orig.source end;
     NEW.special_event_id := null;
     NEW.boost_id := null;
@@ -1635,7 +1635,7 @@ begin
     end if;
   elsif v_is_reversal and v_orig_counts then
     perform private.recompute_streak(NEW.profile_id);
-    -- DECISIONS.md (SQL fixer r2): a original deixa de contar como atividade (§4.8) — last_entry_at da temporada
+    -- Nota de implementação: a original deixa de contar como atividade (§4.8) — last_entry_at da temporada
     -- é recalculado do ledger para reproduzir recompute_stats (§7.2); greatest() sozinho manteria a data estornada.
     update public.profile_season_stats ss
        set last_entry_at = (select max(e.occurred_at) from public.point_entries e
@@ -2574,7 +2574,7 @@ begin
   raise exception using message = p_code, detail = p_detail, errcode = p_errcode;
 end $$;
 
--- DECISIONS.md: lê um valor monetário de um patch jsonb e valida a faixa de numeric(14,2) (0 .. 999.999.999.999)
+-- Nota de implementação: lê um valor monetário de um patch jsonb e valida a faixa de numeric(14,2) (0 .. 999.999.999.999)
 -- sem deixar vazar 22P02/22003/23514 cru. Devolve null quando a chave está ausente ou é null.
 create or replace function private.patch_goal(p_patch jsonb, p_key text)
 returns numeric language plpgsql immutable security definer set search_path = ''
@@ -2594,7 +2594,7 @@ begin
   return v_goal;
 end $$;
 
--- DECISIONS.md (SQL fixer r2): SQLSTATE cru de dado (classe 22: 22P02/22007/22003/22001) ou de integridade
+-- Nota de implementação: SQLSTATE cru de dado (classe 22: 22P02/22007/22003/22001) ou de integridade
 -- (classe 23: 23514/23502/23503/23505) que escape da validação explícita de uma RPC de escrita vira
 -- INVALID_ARGUMENT (P0001, detail pt-BR com o campo/constraint) — §9: "toda escrita do fluxo normal
 -- passa por RPC e devolve código do catálogo". FK de perfil inexistente → PROFILE_NOT_FOUND.
@@ -2871,7 +2871,7 @@ begin
   select * into v_profile from public.profiles p where p.id = p_profile_id for update;
   if not found then perform private.fail('PROFILE_NOT_FOUND', 'Perfil não encontrado.'); end if;
   v_old_status := v_profile.status;
-  -- DECISIONS.md: metas validadas antes de qualquer escrita (GOAL_INVALID em vez de 23514 cru)
+  -- Nota de implementação: metas validadas antes de qualquer escrita (GOAL_INVALID em vez de 23514 cru)
   v_new_goal := private.patch_goal(p_patch, 'goal_amount');
   if p_patch ? 'goal_amount' and v_new_goal is null then
     perform private.fail('GOAL_INVALID', 'A meta deve ser um valor entre 0 e 999.999.999.999.');
@@ -2904,7 +2904,7 @@ begin
   where p.id = p_profile_id;
 
   if p_patch ?| array['email', 'phone', 'default_goal_amount', 'notes'] then
-    -- SQL fixer r2: comparar exatamente o que o UPDATE grava (lower(trim())) — e-mail com espaços não pode
+    -- Nota de implementação: comparar exatamente o que o UPDATE grava (lower(trim())) — e-mail com espaços não pode
     -- passar pela checagem e estourar profile_private_email_uq (23505 cru)
     if p_patch ? 'email' and exists (
       select 1 from public.profile_private pp where lower(pp.email) = lower(trim(p_patch ->> 'email')) and pp.profile_id <> p_profile_id
@@ -2978,7 +2978,7 @@ begin
   end if;
   return jsonb_build_object('profile', v_result, 'warnings', to_jsonb(v_warnings));
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3045,7 +3045,7 @@ begin
   perform private.audit('rpc', 'update_app_settings', '1', null, p_patch);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3063,7 +3063,7 @@ declare
   v_ends timestamptz;
 begin
   perform private.assert_admin();
-  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  -- Nota de implementação: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
   v_id := (p ->> 'id')::uuid;
   v_starts := (p ->> 'starts_at')::timestamptz;
   v_ends := (p ->> 'ends_at')::timestamptz;
@@ -3092,7 +3092,7 @@ begin
   perform private.audit('rpc', 'save_special_event', v_row.id::text, null, p);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3190,7 +3190,7 @@ declare
   v_xp int;
 begin
   perform private.assert_admin();
-  -- DECISIONS.md: validar antes do insert para nunca vazar 23502/23514 cru (§9: RPC devolve código do catálogo)
+  -- Nota de implementação: validar antes do insert para nunca vazar 23502/23514 cru (§9: RPC devolve código do catálogo)
   if p_name is null or length(trim(p_name)) < 1 or length(trim(p_name)) > 60 then
     perform private.fail('NAME_REQUIRED', 'Informe o nome (1 a 60 caracteres).');
   end if;
@@ -3220,7 +3220,7 @@ begin
   end if;
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3251,7 +3251,7 @@ begin
   select * into v_row from public.seasons s where s.id = p_season_id for update;
   if not found then perform private.fail('SEASON_NOT_FOUND', 'Temporada não encontrada.'); end if;
 
-  -- DECISIONS.md: valores do patch são validados/convertidos aqui para nunca vazar 22007/22P02/23514 cru (§9)
+  -- Nota de implementação: valores do patch são validados/convertidos aqui para nunca vazar 22007/22P02/23514 cru (§9)
   if p_patch ? 'name' and (p_patch ->> 'name') is not null
      and (length(trim(p_patch ->> 'name')) < 1 or length(trim(p_patch ->> 'name')) > 60) then
     perform private.fail('NAME_REQUIRED', 'Informe o nome (1 a 60 caracteres).');
@@ -3292,7 +3292,7 @@ begin
   perform private.audit('rpc', 'update_season', p_season_id::text, null, p_patch);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3472,7 +3472,7 @@ begin
   select * into v_rule from public.point_rules r where r.id = p_rule_id and r.deleted_at is null;
   if not found then perform private.fail('RULE_NOT_FOUND', 'Regra de pontuação não encontrada.'); end if;
   if v_qty < 1 or v_qty > 1000 then perform private.fail('QUANTITY_INVALID', 'Quantidade deve ser entre 1 e 1000.'); end if;
-  -- DECISIONS.md: numeric(14,2) aceita até 999.999.999.999,99; validar o teto aqui evita 22003 cru (§9).
+  -- Nota de implementação: numeric(14,2) aceita até 999.999.999.999,99; validar o teto aqui evita 22003 cru (§9).
   -- Só o teto: null/negativo continuam como AMOUNT_REQUIRED em before_point_entry (§6.6).
   if p_amount is not null and p_amount > 999999999999 then
     perform private.fail('AMOUNT_INVALID', 'O valor em R$ deve ser no máximo 999.999.999.999.');
@@ -3502,7 +3502,7 @@ begin
   end if;
   return v_entry;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3537,7 +3537,7 @@ begin
   returning * into v_entry;
   return v_entry;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3571,7 +3571,7 @@ begin
   returning * into v_entry;
   return v_entry;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3622,7 +3622,7 @@ declare
   v_pid uuid;
 begin
   perform private.assert_admin();
-  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  -- Nota de implementação: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
   v_id := (p ->> 'id')::uuid;
   v_spin := (p ->> 'reward_spin')::public.wheel_kind;
   v_audience := coalesce((p ->> 'audience')::public.mission_audience, 'all');
@@ -3687,7 +3687,7 @@ begin
   perform private.audit('rpc', 'save_mission', v_row.id::text, null, p);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3718,7 +3718,7 @@ declare
   v_pid uuid;
 begin
   perform private.assert_admin();
-  -- SQL fixer r2: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
+  -- Nota de implementação: casts do jsonb no corpo (não no declare) para cair no handler INVALID_ARGUMENT
   v_id := (p ->> 'id')::uuid;
   v_kind := (p ->> 'kind')::public.challenge_kind;
   v_spin := (p ->> 'reward_spin')::public.wheel_kind;
@@ -3776,7 +3776,7 @@ begin
   perform private.audit('rpc', 'save_challenge', v_row.id::text, null, p);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -3979,7 +3979,7 @@ begin
   returning * into v_row;
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -4015,7 +4015,7 @@ begin
   returning q.* into v_row;
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -4287,7 +4287,7 @@ begin
   if p_prizes is null or jsonb_typeof(p_prizes) <> 'array' then
     perform private.fail('SORT_ORDER_DUPLICATE', 'Há prêmios com a mesma posição.');
   end if;
-  -- SQL fixer r2: cada item precisa ser objeto com sort_order inteiro >= 0 — a fase 1 usa o espaço negativo
+  -- Nota de implementação: cada item precisa ser objeto com sort_order inteiro >= 0 — a fase 1 usa o espaço negativo
   -- (-1 - sort_order) como área temporária, e um sort_order negativo na entrada colidiria com ele (23505 cru).
   if exists (
     select 1 from jsonb_array_elements(p_prizes) x
@@ -4334,7 +4334,7 @@ begin
   perform private.audit('rpc', 'save_wheel_prizes', v_wheel.id::text, null, p_prizes);
   return query select p.* from public.wheel_prizes p where p.wheel_id = v_wheel.id and p.deleted_at is null and p.is_active order by p.sort_order, p.id;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -4416,7 +4416,7 @@ begin
   perform private.audit('rpc', 'handle_redemption', p_redemption_id::text, null, jsonb_build_object('action', p_action, 'notes', p_notes, 'status', v_new));
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;
@@ -5039,7 +5039,7 @@ begin
       else p_patch end);
   return v_row;
 exception when data_exception or integrity_constraint_violation then
-  -- DECISIONS.md (SQL fixer r2): nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
+  -- Nota de implementação: nunca vazar SQLSTATE cru de uma RPC de escrita (§9)
   declare v_diag_col text; v_diag_con text; v_diag_msg text;
   begin
     get stacked diagnostics v_diag_col = column_name, v_diag_con = constraint_name, v_diag_msg = message_text;

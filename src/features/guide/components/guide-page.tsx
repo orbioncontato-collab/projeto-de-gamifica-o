@@ -14,7 +14,7 @@ import {
   type GuideStep,
 } from '../guide-steps'
 
-/** /admin/guia — página estática: 9 passos de implantação + checklist (FEATURE-INVENTORY §14, DATA-MODEL Apêndice C). */
+/** /admin/guia — página estática: 9 passos de implantação + checklist (DATA-MODEL Apêndice C). */
 export function GuidePage() {
   return (
     <PageFrame

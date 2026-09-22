@@ -1,0 +1,84 @@
+SALES LEAGUE — LICENÇA DE USO
+Orbion · versão 1.0
+
+Este documento diz, em português claro, o que você pode e o que não pode fazer
+com o código e o material que recebeu. Ele vale a partir da data da compra.
+
+
+1. O QUE VOCÊ RECEBEU
+
+   Uma licença de uso perpétua, não exclusiva e intransferível do Sales League
+   (código-fonte, banco de dados e manual), para uso de UMA empresa — a sua.
+
+   Perpétua: não expira e não tem mensalidade para a Orbion.
+   Não exclusiva: a Orbion vende o mesmo produto a outros clientes.
+   Intransferível: a licença é da sua empresa e não é vendida ou cedida a outra.
+
+
+2. O QUE VOCÊ PODE FAZER
+
+   - Instalar e rodar a plataforma na sua conta do Supabase e da Vercel, ou em
+     qualquer outra infraestrutura que você contrate.
+   - Usar com quantas pessoas quiser dentro da sua empresa. Não há cobrança por
+     usuário e a Orbion não limita o tamanho do time.
+   - Modificar o código à vontade: mudar telas, regras, textos, cores e o que
+     mais precisar. O código é seu para adaptar.
+   - Contratar qualquer desenvolvedor ou agência para fazer essas mudanças.
+   - Manter cópias e backups, inclusive em repositório privado seu.
+
+
+3. O QUE VOCÊ NÃO PODE FAZER
+
+   - Revender, sublicenciar, alugar ou distribuir o código, o banco ou o manual
+     a terceiros, gratuitamente ou não.
+   - Operar a plataforma como serviço para outras empresas (SaaS, white-label
+     para clientes seus, ou implantação em nome de terceiros).
+   - Publicar o código em repositório público ou qualquer lugar de acesso aberto.
+   - Remover os créditos de autoria da Orbion do código-fonte e do manual.
+
+   Personalizar a marca DENTRO do app (nome, cor, logo, em Configurações →
+   Marca) é uso normal e previsto — isso não é remover crédito de autoria.
+
+
+4. SE A SUA EMPRESA TIVER MAIS DE UMA OPERAÇÃO
+
+   A licença cobre uma empresa. Grupos com CNPJs distintos, franquias ou
+   operações que queiram instalações separadas devem falar com a Orbion —
+   existe condição para isso e ela é simples de resolver.
+
+
+5. GARANTIA E RESPONSABILIDADE
+
+   O produto é entregue no estado em que se encontra, testado e documentado,
+   mas sem garantia de que atenderá a todo e qualquer uso específico.
+
+   A Orbion não hospeda, não opera e não acessa a sua instalação: os dados
+   ficam no seu Supabase, sob a sua conta. Por isso não responde por perda de
+   dados, indisponibilidade, custos de terceiros (Supabase, Vercel, GitHub) ou
+   por prejuízos decorrentes do uso ou da impossibilidade de uso da plataforma.
+
+   Backup é responsabilidade sua. O capítulo 8 do manual explica como fazer.
+
+   Se você modificar o código, a Orbion não responde pelo comportamento da
+   versão modificada.
+
+
+6. SUPORTE
+
+   Dúvidas sobre implantação e uso: orbioncontato@gmail.com
+
+   Mande junto: o capítulo e a página do manual onde travou, o que aparece na
+   tela (uma foto ou print resolve) e o endereço do seu site na Vercel. Com
+   isso a resposta sai muito mais rápido.
+
+   O suporte cobre entender o manual e resolver problemas de implantação. Não
+   cobre desenvolvimento de funcionalidades novas nem manutenção de código que
+   você tenha modificado — mas a Orbion pode orçar esses trabalhos à parte.
+
+
+7. LEI APLICÁVEL
+
+   Esta licença é regida pelas leis da República Federativa do Brasil.
+
+
+Sales League é um produto da Orbion. Os dados são seus.

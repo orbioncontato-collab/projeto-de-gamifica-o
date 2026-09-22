@@ -16,7 +16,7 @@ export interface PointsPageProps {
 
 const TABS: readonly PointsTab[] = ['regras', 'lancar', 'historico']
 
-/** /admin/pontuacao — abas Lançar / Regras / Histórico (FEATURE-INVENTORY §12). */
+/** /admin/pontuacao — abas Lançar / Regras / Histórico. */
 export function PointsPage({ tab, profileId }: PointsPageProps) {
   const navigate = useNavigate()
   const setTab = (value: string) => {

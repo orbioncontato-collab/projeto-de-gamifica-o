@@ -9,7 +9,7 @@ import type { LinkTo } from './types'
 export interface EmptyStateAction {
   label: string
   to?: LinkTo
-  /** search params obrigatórios da rota destino (ex.: `{ aba: 'temporadas' }`) — handoff WP2/5/6/7 */
+  /** search params obrigatórios da rota destino (ex.: `{ aba: 'temporadas' }`) */
   search?: LinkProps['search']
   onClick?: () => void
 }
