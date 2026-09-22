@@ -1035,7 +1035,7 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 |---|---|---|---|
 | `useAppSettings()` | | `AppSettingsRow` | `app_settings.eq('id', 1).single()` |
 | `useAppSecrets()` (admin) | | `AppSecretsRow` | `app_secrets.eq('id', 1).single()` — chave `qk.settings.secrets()`; usado na tela de configurações (a Equipe lê o código por `useTeamCode()` próprio, §4.5 features/team, sem importar daqui) |
-| `useUpdateAppSettings()` | `AppSettingsPatch` (inclui `auto_approve_members`) | mutation | rpc `update_app_settings` → settings.app, bootstrap. O `MemberApprovalCard` (aba `codigo`) usa este hook com `{ auto_approve_members }` e mostra o aviso "Ligado: quem tiver o código entra na hora — recomendado só com confirmação de e-mail ativa (DATA-MODEL §16.2)" |
+| `useUpdateAppSettings()` | `AppSettingsPatch` (inclui `auto_approve_members` e os 4 campos de marca) | mutation | rpc `update_app_settings` → settings.app, bootstrap; se o patch tocar `company_name`/`platform_name`/`brand_preset`/`logo_data_url`/`default_theme`, invalida também `qk.branding()`. O `MemberApprovalCard` (aba `codigo`) usa este hook com `{ auto_approve_members }` e mostra o aviso "Ligado: quem tiver o código entra na hora — recomendado só com confirmação de e-mail ativa (DATA-MODEL §16.2)"; o `BrandingForm` (aba `marca`) o usa com os campos de marca |
 | `useRotateTeamCode()` | — | mutation → novo código | rpc `rotate_team_code` (com `ConfirmDialog`) → settings.secrets |
 | `useSeasons()` | | `VSeason[]` | `v_seasons.order('starts_at', desc)` |
 | `useCreateSeason()` / `useUpdateSeason()` / `useActivateSeason()` / `useCloseSeason()` | | mutations | rpcs → settings.seasons, bootstrap; `close` → `invalidateAfterLedgerChange` e devolve `CloseSeasonPayload` com `warnings`; `activate` trata `SEASON_NOT_STARTED` (o botão já vem desabilitado enquanto `starts_at > now`, com tooltip "Começa em DD/MM") |
@@ -1043,6 +1043,17 @@ Quando `seasonId === null` (sem temporada ativa), os hooks retornam `[]`/`null` 
 | `useSaveSpecialEvent()` | `SaveSpecialEventInput` | mutation → `SpecialEventRow` | rpc `save_special_event` (`callRpc('save_special_event', { p })`) — erros `EVENT_OVERLAP`/`EVENT_RANGE_INVALID` pelo catálogo (nunca `23P01` cru) → settings.events, bootstrap |
 | `useDeleteSpecialEvent()` | id | mutation | `special_events.update({ deleted_at: now, is_active: false }).eq('id')` (policy admin; único write direto nessa tabela) → settings.events, bootstrap |
 | `useRecomputeStats()` | `profileId?` | mutation → `RecomputeStatsPayload` | rpc → `invalidateAfterLedgerChange` |
+
+**features/branding** (marca do cliente — white-label)
+
+| Hook / peça | Params | Retorna | Fonte |
+|---|---|---|---|
+| `useBrandingQuery()` / `useBranding()` | — | `Branding` (`company_name`, `platform_name`, `brand_preset`, `logo_data_url`, `default_theme`) | rpc `get_branding` (executável por `anon` — a tela de login precisa da marca sem sessão); chave `qk.branding()`, `staleTime` 5 min. `useBranding()` cai para `DEFAULT_BRANDING` enquanto carrega, então `Brand` nunca renderiza vazio |
+| `BrandingProvider` | — | — | Único lugar que escreve `html[data-brand]` e `document.title` (`"<empresa> <plataforma>"`). Aplica `default_theme` com `setTheme(t, { persist: false })` **só** quando `readStoredTheme() === null` — preferência do usuário sempre vence |
+| `presets.ts` | — | `BRAND_PRESETS` (7) | catálogo para o formulário; as cores em si vivem em `styles/tokens.css` (`[data-brand='…']`, §5.2) |
+| `logo-file.ts` | `File` | data-URL ≤ 280 KB | SVG passa direto; raster é redesenhado em canvas a 512 → 256 → 128 px até caber. Erros são `LogoFileError` com mensagem pronta para a UI |
+
+Envolve `AuthProvider` em `main.tsx` (a marca é anterior à sessão). `Brand` (`components/layout`) consome `useBranding()` e mostra a logo enviada ou o `BrandMark` padrão.
 
 ### 4.6 `src/lib/realtime.ts`
 
@@ -1173,6 +1184,7 @@ Cada componente tem story-like demo em `src/components/shared/__demo__/showcase.
 - **Um** atributo: `html[data-theme="dark" | "light"]`, aplicado pelo script inline do `index.html` antes do primeiro paint e mantido por `features/theme/theme-provider.tsx`. `color-scheme` acompanha.
 - Nenhum `!important`. Nenhum seletor por classe arbitrária (`[class*="bg-[#07111F]"]`). Nenhum hex em componente: tudo via `var(--token)` ou utilitário Tailwind gerado por `@theme inline` (`bg-bg`, `bg-elevated`, `text-text`, `text-muted`, `border-line`, `text-accent`, `bg-accent/10`, `text-gold`, `bg-gold/10`, `text-blue`, `text-purple`, `text-red`…). Opacidades funcionam porque Tailwind v4 usa `color-mix` sobre a variável.
 - Exceção única: cores de setor da roleta vêm de `wheel_prizes.color` (dado) com fallback em `features/wheel/wheel-palette.ts`.
+- **Marca do cliente**: um segundo atributo, `html[data-brand]` (7 presets de `app_settings.brand_preset`), redefine só `--accent`, `--accent-hover`, `--ring`, `--glow-accent` e `--bg-glow`. Cada preset tem a variante do tema claro (`[data-theme='light'][data-brand='…']`) com o tom escurecido — todos os pares foram medidos ≥ 4,5:1 (texto sobre `--bg`/card e `--accent-fg` sobre `--accent`). Por isso o gestor escolhe entre presets, não uma cor livre. Escrito só por `features/branding/branding-provider.tsx` (e, em prévia, pelo `BrandingForm`, que restaura o valor salvo ao desmontar).
 
 ### 5.2 `src/styles/tokens.css`
 

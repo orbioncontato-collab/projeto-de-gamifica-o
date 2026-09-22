@@ -6,6 +6,7 @@ import {
   Gift,
   KeyRound,
   ListChecks,
+  Palette,
   Rocket,
   Swords,
   Target,
@@ -45,6 +46,19 @@ export const GUIDE_STEPS: readonly GuideStep[] = [
       'Defina a meta do time em R$ — ela aparece no painel e no fechamento.',
     ],
     link: { label: 'Abrir configurações', to: '/admin/configuracoes', search: { aba: 'temporadas' } },
+  },
+  {
+    id: 'branding',
+    icon: Palette,
+    tone: 'purple',
+    title: 'Deixe a plataforma com a cara da empresa',
+    summary: 'Nome da plataforma, cor de destaque, logo e tema padrão — sem mexer em código.',
+    details: [
+      'A cor escolhida é pré-visualizada na hora; só vale para todos depois de salvar.',
+      'A logo entra num quadrado: use o símbolo quadrado da marca, não a versão horizontal.',
+      'O tema padrão vale para quem ainda não escolheu o próprio no botão de lua/sol.',
+    ],
+    link: { label: 'Abrir marca', to: '/admin/configuracoes', search: { aba: 'marca' } },
   },
   {
     id: 'code',
@@ -168,6 +182,11 @@ export const GUIDE_CHECKLIST: readonly ChecklistItem[] = [
     id: 'season',
     label: 'Temporada ativa com meta do time definida',
     link: { label: 'Temporadas', to: '/admin/configuracoes', search: { aba: 'temporadas' } },
+  },
+  {
+    id: 'branding',
+    label: 'Marca ajustada: nome da plataforma, cor e logo',
+    link: { label: 'Marca', to: '/admin/configuracoes', search: { aba: 'marca' } },
   },
   {
     id: 'code',

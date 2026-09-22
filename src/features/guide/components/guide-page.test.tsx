@@ -14,9 +14,10 @@ vi.mock('@/features/auth/bootstrap-query', async (orig) => ({
 import { GuidePage } from './guide-page'
 
 describe('GuidePage', () => {
-  test('conteúdo estático: 9 passos na ordem do Apêndice C e checklist', async () => {
+  test('conteúdo estático: 10 passos na ordem do Apêndice C e checklist', async () => {
     expect(GUIDE_STEPS.map((s) => s.id)).toEqual([
       'settings',
+      'branding',
       'code',
       'profiles',
       'rules',
@@ -28,9 +29,9 @@ describe('GuidePage', () => {
     ])
     renderInRouter(<GuidePage />)
     expect(await screen.findByRole('heading', { name: 'Guia de uso' })).toBeInTheDocument()
-    expect(screen.getAllByRole('article')).toHaveLength(9)
+    expect(screen.getAllByRole('article')).toHaveLength(10)
     expect(screen.getByText('Passo 1')).toBeInTheDocument()
-    expect(screen.getByText('Passo 9')).toBeInTheDocument()
+    expect(screen.getByText('Passo 10')).toBeInTheDocument()
     for (const step of GUIDE_STEPS)
       expect(screen.getByRole('heading', { name: step.title })).toBeInTheDocument()
     for (const item of GUIDE_CHECKLIST) expect(screen.getByText(item.label)).toBeInTheDocument()
